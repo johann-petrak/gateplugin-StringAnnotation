@@ -3,7 +3,7 @@
  *  
  */
 
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie1;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie1;
 
 import gate.util.GateRuntimeException;
 
@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.Lookup;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.Lookup;
 
 /** 
  * 

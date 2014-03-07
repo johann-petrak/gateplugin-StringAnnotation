@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.tests;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.tests;
 
 import static org.junit.Assert.*;
 import gate.Annotation;
@@ -27,16 +27,16 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.FeatureGazetteer;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.GazStore;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.Lookup;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.State;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie2.GazStoreTrie2;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.GazStoreTrie3;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.StoreArrayOfCharArrays;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.StoreCharMapPhase1;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.StoreStates;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.ExtendedGazetteer;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.FeatureGazetteer;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.GazStore;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.Lookup;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.State;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie2.GazStoreTrie2;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie3.GazStoreTrie3;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie3.StoreArrayOfCharArrays;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie3.StoreCharMapPhase1;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie3.StoreStates;
 
 public class Tests1 {
 
@@ -214,7 +214,7 @@ public class Tests1 {
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
     parms.put("backendNr",backendNr);
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
+    ExtendedGazetteer eg = (ExtendedGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     // load the document
     parms = Factory.newFeatureMap();
@@ -299,7 +299,7 @@ public class Tests1 {
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
     parms.put("backendNr",backendNr);
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
+    ExtendedGazetteer eg = (ExtendedGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     // load the document
     eg.setOutputAnnotationSet("EXT");

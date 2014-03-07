@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.tests;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.tests;
 
 import static org.junit.Assert.assertTrue;
 import gate.Factory;
@@ -18,8 +18,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.GazStoreTrie3;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.ExtendedGazetteer;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie3.GazStoreTrie3;
 
 public class Tests2 {
 
@@ -63,7 +63,7 @@ public class Tests2 {
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Memory used before loading gazetteer: "+before);
     long startTime = System.currentTimeMillis();
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
+    ExtendedGazetteer eg = (ExtendedGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     long endTime = System.currentTimeMillis();
     System.gc();
@@ -89,7 +89,7 @@ public class Tests2 {
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Memory used before loading gazetteer: "+before);
     long startTime = System.currentTimeMillis();
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
+    ExtendedGazetteer eg = (ExtendedGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     long endTime = System.currentTimeMillis();
     System.gc();
@@ -114,7 +114,7 @@ public class Tests2 {
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Memory used before loading gazetteer: "+before);
     long startTime = System.currentTimeMillis();
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
+    ExtendedGazetteer eg = (ExtendedGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     long endTime = System.currentTimeMillis();
     System.gc();

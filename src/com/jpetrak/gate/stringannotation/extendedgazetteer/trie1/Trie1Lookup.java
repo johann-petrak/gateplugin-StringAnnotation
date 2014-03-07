@@ -1,6 +1,6 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie1;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie1;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.Lookup;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.Lookup;
 
 // TODO: make this just an interface or abstract class, with the actual
 // implementation a subclass in one of the implementation packages!

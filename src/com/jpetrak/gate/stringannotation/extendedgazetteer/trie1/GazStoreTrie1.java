@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie1;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie1;
 
 import gate.FeatureMap;
 import gate.util.GateRuntimeException;
@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.GazStore;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.ListInfo;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.Lookup;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.Visitor;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.GazStore;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.ListInfo;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.Lookup;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.Visitor;
 
 
 public class GazStoreTrie1 extends GazStore {
@@ -136,7 +136,7 @@ public class GazStoreTrie1 extends GazStore {
 
   // TODO: this should probably be a method of the visitor!
   @Override
-  public Iterator<Lookup> getLookups(com.jpetrak.gate.stringannotation.extendedgazetteer2.State matchingState) {
+  public Iterator<Lookup> getLookups(com.jpetrak.gate.stringannotation.extendedgazetteer.State matchingState) {
     State s = (State)matchingState;
     return s.lookupSet.iterator();
   }

@@ -4,7 +4,7 @@
  * 
  *
  */
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 
 import gate.Annotation;
@@ -35,18 +35,18 @@ import org.apache.log4j.Logger;
 
 /**
  * See documentation in the wiki:
- * http://code.google.com/p/gateplugin-stringannotation/wiki/ExtendedGazetteer2
+ * TODO
  *
  *  @author Johann Petrak
  */
 @CreoleResource(
-  name = "Extended Gazetteer 2",
-  comment = "A new fast, memory-efficient and improved gazetteer implementation",
+  name = "Extended Gazetteer",
+  comment = "Fast, low-memory footprint gazetteer with many additional features",
   icon="shefGazetteer.gif",
-  helpURL="http://code.google.com/p/gateplugin-stringannotation/wiki/ExtendedGazetteer2"
+  helpURL="TODO"
 )
 @SuppressWarnings("javadoc")
-public class ExtendedGazetteer2 extends GazetteerBase
+public class ExtendedGazetteer extends GazetteerBase
 {
 
   /**
@@ -260,7 +260,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
   AnnotationSet outputAS = null;
   
   
-  public ExtendedGazetteer2() {
+  public ExtendedGazetteer() {
     logger = Logger.getLogger(this.getClass().getName());
   }
 

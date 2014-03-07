@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie2;
 
 import it.unimi.dsi.fastutil.chars.CharBigArrayBigList;
 

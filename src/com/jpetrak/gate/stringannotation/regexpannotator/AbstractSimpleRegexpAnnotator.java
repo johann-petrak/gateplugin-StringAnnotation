@@ -4,7 +4,7 @@
  *  $Id: AbstractSimpleRegexpAnnotator.java  $
  *
  */
-package at.ofai.gate.regexpannotator;
+package com.jpetrak.gate.stringannotation.regexpannotator;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;

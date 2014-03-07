@@ -4,7 +4,7 @@
  *  $Id: SimpleRegexpAnnotator.java  $
  *
  */
-package at.ofai.gate.regexpannotator;
+package com.jpetrak.gate.stringannotation.regexpannotator;
 
 
 import at.ofai.gate.virtualdocuments.AnnotatedDocumentTransformer;

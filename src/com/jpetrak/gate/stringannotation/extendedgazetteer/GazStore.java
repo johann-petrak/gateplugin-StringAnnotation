@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -8,7 +8,7 @@ import java.util.Iterator;
 import java.io.Serializable;
 
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.State;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.State;
 
 
 import gate.FeatureMap;

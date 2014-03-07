@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie3;
 
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
