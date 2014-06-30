@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 /**
  * A visitor for some GazStore implementation. The actual visitor returned by 

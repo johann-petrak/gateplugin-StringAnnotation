@@ -6,7 +6,7 @@
  * License: LGPL
  *
  */
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 import gate.Factory;
 import gate.FeatureMap;
@@ -38,7 +38,7 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.GazStoreTrie3;
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.GazStoreTrie3;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
 

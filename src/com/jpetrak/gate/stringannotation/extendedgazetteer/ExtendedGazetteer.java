@@ -4,9 +4,10 @@
  * 
  *
  */
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 
+import com.jpetrak.gate.stringannotation.utils.TextChunk;
 import gate.Annotation;
 import gate.AnnotationSet;
 import gate.Document;
@@ -46,7 +47,7 @@ import org.apache.log4j.Logger;
   helpURL="TODO"
 )
 @SuppressWarnings("javadoc")
-public class ExtendedGazetteer2 extends GazetteerBase
+public class ExtendedGazetteer extends GazetteerBase
 {
 
   /**
@@ -260,7 +261,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
   AnnotationSet outputAS = null;
   
   
-  public ExtendedGazetteer2() {
+  public ExtendedGazetteer() {
     logger = Logger.getLogger(this.getClass().getName());
   }
 
@@ -329,7 +330,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
     // now split the document into chunks if necessary:
     // = for each containing annotation we create a chunk,
     // = each split annotation forces the end of a chunk
-    // Each chunk is represented by an instance of Chunk 
+    // Each chunk is represented by an instance of TextChunk 
     if(containingAnns == null) {
       if(splitAnns != null) { // we need to do some additional chunking
         List<Annotation> splitAnnsList = Utils.inDocumentOrder(splitAnns);
@@ -337,7 +338,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
         for(Annotation splitAnn : splitAnnsList) {
           long splitOffset = splitAnn.getStartNode().getOffset();
           if(splitOffset > lastOffset) {
-            doAnnotateChunk(Chunk.makeChunk(
+            doAnnotateChunk(TextChunk.makeChunk(
                 document,lastOffset,splitOffset,!caseSensitive,
                 processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
                 matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
@@ -346,13 +347,13 @@ public class ExtendedGazetteer2 extends GazetteerBase
         } // for
         // anything left?
         if(lastOffset < endOffset) {
-          doAnnotateChunk(Chunk.makeChunk(document,lastOffset,endOffset,!caseSensitive,
+          doAnnotateChunk(TextChunk.makeChunk(document,lastOffset,endOffset,!caseSensitive,
               processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
               matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
         }
       } else {
         // create a chunk from the whole document
-        doAnnotateChunk(Chunk.makeChunk(document,0,endOffset,!caseSensitive,
+        doAnnotateChunk(TextChunk.makeChunk(document,0,endOffset,!caseSensitive,
             processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
             matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
       }
@@ -373,7 +374,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
             for(Annotation splitAnn : splitAnnsList) {
               long splitOffset = splitAnn.getStartNode().getOffset();
               if(splitOffset > lastOffset) {
-                doAnnotateChunk(Chunk.makeChunk(
+                doAnnotateChunk(TextChunk.makeChunk(
                     document,lastOffset,splitOffset,!caseSensitive,
                     processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
                     matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
@@ -382,7 +383,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
             } // for
             // anything left?
             if(lastOffset < endOffset) {
-             doAnnotateChunk(Chunk.makeChunk(
+             doAnnotateChunk(TextChunk.makeChunk(
                  document,lastOffset,endOffset,!caseSensitive,
                  processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
                  matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
@@ -392,14 +393,14 @@ public class ExtendedGazetteer2 extends GazetteerBase
             
           } else {
             // nothing within this containining annotation, just annotate the whole chunk
-            doAnnotateChunk(Chunk.makeChunk(
+            doAnnotateChunk(TextChunk.makeChunk(
                 document,containingAnn,!caseSensitive,
                 processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
                 matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
           }
         } else {
           // no splits, just annotate the chunk for this containing annotation
-          doAnnotateChunk(Chunk.makeChunk(document,containingAnn,!caseSensitive,
+          doAnnotateChunk(TextChunk.makeChunk(document,containingAnn,!caseSensitive,
               processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
               matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
         }
@@ -411,7 +412,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
   } // execute
 
    public void doAnnotateChunk(
-       Chunk chunk)
+       TextChunk chunk)
      throws ExecutionException{
     interrupted = false;
     int length = chunk.getLength();
@@ -554,7 +555,7 @@ public class ExtendedGazetteer2 extends GazetteerBase
   
   
   
-  protected void createLookups(Chunk chunk,State matchingState, 
+  protected void createLookups(TextChunk chunk,State matchingState, 
       int matchedRegionStart, int matchedRegionEnd)
   {
     Iterator<Lookup> lookupIter = gazStore.getLookups(matchingState);

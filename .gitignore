@@ -11,3 +11,6 @@
 build.properties
 *.gazbin
 StringAnnotation-*.zip
+TEST-*.xml
+TESTS-TestSuites.xml
+junit-noframes.html

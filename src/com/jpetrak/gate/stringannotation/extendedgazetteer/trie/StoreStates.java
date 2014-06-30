@@ -1,5 +1,6 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie;
 
+import com.jpetrak.gate.stringannotation.utils.StoreArrayOfCharArrays;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 

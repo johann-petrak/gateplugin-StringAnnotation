@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.utils;
 
 import gate.Annotation;
 import gate.AnnotationSet;
@@ -20,8 +20,8 @@ import java.util.List;
  * @author Johann Petrak
  *
  */
-public class Chunk {
-  private Chunk() { }
+public class TextChunk {
+  private TextChunk() { }
   
   private static final boolean debug = false;
   
@@ -165,8 +165,9 @@ public class Chunk {
     }    
   }
   
-  public static Chunk makeChunk(
-      Document document, long fromOffset, long toOffset,
+  public static TextChunk makeChunk(
+      Document document, 
+      long fromOffset, long toOffset,
       boolean caseNormalize,
       AnnotationSet processAnns, String wordAnnotationType, String wordAnnotationFeature, String spaceAnnotationType,
       boolean startWithWordStart, boolean endWithWordEnd, 
@@ -175,7 +176,7 @@ public class Chunk {
     // TODO: at the moment we do not do language specific case normalization here because this would
     // make it more complex to keep track of the indices -- String.toUpper(locale) can change the size of the string!
     // Instead we use char.toUpper which is not perfect but makes things easier!
-    Chunk chunk = new Chunk();
+    TextChunk chunk = new TextChunk();
     boolean haveFeature = !(wordAnnotationFeature == null || wordAnnotationFeature.equals(""));
     String doctext = document.getContent().toString();
     chunk.initialLength = Math.max((int)(toOffset-fromOffset),500);
@@ -346,7 +347,7 @@ public class Chunk {
     chunk.length = i;
     return chunk;
   }
-  public static Chunk makeChunk(Document document, Annotation ann, boolean caseNormalise,
+  public static TextChunk makeChunk(Document document, Annotation ann, boolean caseNormalise,
       AnnotationSet processAnns, String wordAnnotationType, String wordAnnotationFeature, String spaceAnnotationType,
       boolean startWithWordStart, boolean endWithWordEnd, String wordStartFeature, String wordEndFeature,
       String wordFeature) {
@@ -363,6 +364,10 @@ public class Chunk {
     guardOffset(from);
     guardOffset(to);
     return new String(Arrays.copyOfRange(text, from, to+1));
+  }
+  
+  public String getTextString() {
+    return new String(text);
   }
   
   public String toString() {

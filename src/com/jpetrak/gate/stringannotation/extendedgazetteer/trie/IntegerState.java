@@ -1,4 +1,4 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie;
 
 
 /**

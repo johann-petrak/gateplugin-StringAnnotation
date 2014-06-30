@@ -1,5 +1,6 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.utils;
 
+import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.Utils;
 import java.io.Serializable;
 
 import gate.util.GateRuntimeException;

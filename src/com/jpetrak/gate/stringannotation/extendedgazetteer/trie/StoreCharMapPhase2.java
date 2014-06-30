@@ -1,5 +1,6 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie;
 
+import com.jpetrak.gate.stringannotation.utils.StoreArrayOfCharArrays;
 import gate.util.GateRuntimeException;
 
 public class StoreCharMapPhase2 extends StoreCharMapBase {

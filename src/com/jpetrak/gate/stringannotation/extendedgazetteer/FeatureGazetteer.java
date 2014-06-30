@@ -4,7 +4,7 @@
  * 
  *
  */
-package com.jpetrak.gate.stringannotation.extendedgazetteer2;
+package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 
 import gate.Annotation;

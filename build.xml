@@ -98,7 +98,7 @@
       </classpath>
       <sysproperty key="java.awt.headless" value="true" />
       <formatter type="xml" />
-      <test name="com.jpetrak.gate.stringannotation.extendedgazetteer2.tests.Tests1" />
+      <test name="com.jpetrak.gate.stringannotation.tests.Tests1" />
     </junit>
     <junitreport>
       <fileset dir=".">
@@ -116,7 +116,7 @@
       </classpath>
       <sysproperty key="java.awt.headless" value="true" />
       <formatter type="xml" />
-      <test name="com.jpetrak.gate.stringannotation.extendedgazetteer2.tests.Tests2" />
+      <test name="com.jpetrak.gate.stringannotation.tests.Tests2" />
     </junit>
     <junitreport>
       <fileset dir=".">
@@ -134,7 +134,7 @@
       </classpath>
       <sysproperty key="java.awt.headless" value="true" />
       <formatter type="xml" />
-      <test name="com.jpetrak.gate.stringannotation.extendedgazetteer2.tests.Tests3" />
+      <test name="com.jpetrak.gate.stringannotation.tests.Tests3" />
     </junit>
     <junitreport>
       <fileset dir=".">

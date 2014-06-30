@@ -1,7 +1,7 @@
-package com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3;
+package com.jpetrak.gate.stringannotation.extendedgazetteer.trie;
 
 
-public abstract class State extends com.jpetrak.gate.stringannotation.extendedgazetteer2.State {
+public abstract class State extends com.jpetrak.gate.stringannotation.extendedgazetteer.State {
   public static int nrNodes = 0;
   public static int mapNodes = 0;
   public static int charNodes = 0;
