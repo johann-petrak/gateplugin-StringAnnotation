@@ -20,12 +20,7 @@ ant clean.classes || exit
 rm -rf build.properties
 rm -rf makedist.sh
 rm -rf test
+rm $curdir/${name}-${version}-src.zip
 cd ..
-## find $name -name '.svn' | xargs -n 1 rm -rf
 zip -r $curdir/$name-$version.zip $name
-# cp $curdir/$name-$version.zip $curdir/creole.zip
-# tar zcvf $curdir/$name-$version.tgz $name
-# cp $curdir/creole.zip $name
-# mv $name $name-$version
-# tar zcvf $curdir/$name-$version-updatesite.tgz $name-$version
 popd
