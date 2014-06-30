@@ -88,7 +88,8 @@
 
   <target name="dist" depends="jar,javadoc" />
  
-  <target name="tests" depends="jar,test1,test2,test3"/>
+  <!--  <target name="tests" depends="jar,test1,test2,test3,testJRA1"/> -->
+  <target name="tests" depends="jar,testJRA1"/>
 
   <target name="test1" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes">
@@ -143,6 +144,26 @@
       <report todir="." format="noframes" />
     </junitreport>
   </target>
+
+  <target name="testJRA1" depends="jar">
+    <junit fork="true" showoutput="yes" printsummary="yes" maxmemory="2500M">
+      <classpath>
+        <pathelement location="${jar.location}" />
+        <path refid="compile.classpath" />
+      </classpath>
+      <sysproperty key="java.awt.headless" value="true" />
+      <formatter type="xml" />
+      <test name="com.jpetrak.gate.stringannotation.tests.TestJavaRegexpAnnotator1" />
+    </junit>
+    <junitreport>
+      <fileset dir=".">
+        <include name="TEST-*.xml" />
+      </fileset>
+      <report todir="." format="noframes" />
+    </junitreport>
+  </target>
+
+
 
 
   <!-- Targets used by the main GATE build file 

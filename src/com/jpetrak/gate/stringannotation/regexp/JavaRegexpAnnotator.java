@@ -1,10 +1,10 @@
 /*
- *  AbstractSimpleRegexpAnnotator.java
+ *  JavaRegexpAnnotator.java
  *
- *  $Id: AbstractSimpleRegexpAnnotator.java  $
+ *  $Id: JavaRegexpAnnotator.java  $
  *
  */
-package at.ofai.gate.regexpannotator;
+package com.jpetrak.gate.stringannotation.regexp;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -26,14 +26,14 @@ import org.apache.commons.lang3.text.*;
 
 
 /** 
- * This is the common base class for both the SimpleRegexpAnnotator and 
- * the IndirectSimpleRegexpAnnotator. The functionality of both is the same
- * except that the IndirectSimpleRegexpAnnotator operates on a virtual 
- * document created from an annotation specification.
+ * Annotator for annotating document text based on Java regular expressions.
  *
  * @author Johann Petrak
  */
-public class AbstractSimpleRegexpAnnotator extends AbstractLanguageAnalyser
+@CreoleResource(name = "Java Regexp Annotator",
+helpURL="http://code.google.com/p/gateplugin-stringannotation/wiki/SimpleRegexpAnnotator",
+comment = "Create annotations based on Java regular expressions")
+public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
   implements ProcessingResource {
 
   private static final long serialVersionUID = 1L;
@@ -133,12 +133,6 @@ public class AbstractSimpleRegexpAnnotator extends AbstractLanguageAnalyser
 
     String docText = theDocument.getContent().toString();
 
-    /* If the document's content is empty or contains only whitespace,
-     * we drop out right here, since there's nothing to sentence-split.     */
-    if (docText.trim().length() < 1) {
-      return;
-    }
-
     boolean haveActive = false;
     
     // Initialize all the matchers with the document string and find the first 
@@ -151,6 +145,7 @@ public class AbstractSimpleRegexpAnnotator extends AbstractLanguageAnalyser
       }
       haveActive = haveActive || rule.matcher_active;
     }
+    // if we did not find anything at all, give up already
     if(!haveActive) {
       return;
     }
