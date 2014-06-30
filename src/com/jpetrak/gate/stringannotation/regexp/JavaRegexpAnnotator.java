@@ -20,10 +20,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.lang3.text.*;
 
-// !!!!!!!!!
-// TODO: add runtime parameter containingAnnotation and process text ranges
-// for each annotation of that type.!!!!!
-
+// TODO:
+// = use TextChunk 
+// = runtime parameter containingAnnotationType
+// = matchAtWordEndOnly/matchAtWordStartOnly ??? This will require spaceAnnotationType and 
+//   wordAnnotationType. We need wordAnnotationType anyway, so why not? If both are
+//   false, we simply do not require the annotations and use the text
+//   => should do this for extendedgazetteer too?
+// = add splitAnnotationType
+// = and wordAnnotationType/textFeature for indirect annotation
 
 /** 
  * Annotator for annotating document text based on Java regular expressions.
