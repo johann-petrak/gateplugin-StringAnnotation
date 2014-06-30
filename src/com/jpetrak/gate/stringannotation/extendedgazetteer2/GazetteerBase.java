@@ -8,7 +8,6 @@
  */
 package com.jpetrak.gate.stringannotation.extendedgazetteer2;
 
-
 import gate.Factory;
 import gate.FeatureMap;
 import gate.Resource;
@@ -39,150 +38,111 @@ import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie1.GazStoreTrie1;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie2.GazStoreTrie2;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.GazStoreTrie3;
-import gate.Gate;
-import gate.util.GateException;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 
 import org.yaml.snakeyaml.Yaml;
 
 /**
- * Common Base class for all gazetteer implementations that use one of the gazstore backends.
- * All these PRs need to have the config file URL, case sensitivity (and hidden backend number)
- * init parameters so the parameters and the loading logic is moved into this base class.
+ * Common Base class for all gazetteer implementations. All these PRs need to
+ * have the config file URL, case sensitivity init parameters so the parameters
+ * and the loading logic is moved into this base class.
  *
- *  @author Johann Petrak
+ * @author Johann Petrak
  */
-public abstract class GazetteerBase extends AbstractLanguageAnalyser
-{
+public abstract class GazetteerBase extends AbstractLanguageAnalyser {
 
   /**
-   * 
+   *
    */
-
-  // for debugging and until we found a better solution for choosing the backend
-  protected int backendNr = 3;
-  @Optional
-  @HiddenCreoleParameter
-  @CreoleParameter(comment = "The backend number", defaultValue = "3")
-  public void setBackendNr(Integer nr) {
-    backendNr = nr;
-  }
-  public Integer getBackendNr() {
-    return backendNr;
-  }
-    
-  protected boolean useCache = true;
-  @Optional
-  @HiddenCreoleParameter
-  @CreoleParameter(comment = "Create/use cache files", defaultValue = "true")
-  public void setUseCache(Boolean yesno) {
-    useCache = yesno;
-  }
-  public Boolean getUseCache() {
-    return useCache;
-  }
-  
-  
-  @CreoleParameter(comment = "The URL to the gazetteer configuration file", suffixes="def;defyaml", defaultValue="")
+  @CreoleParameter(comment = "The URL to the gazetteer configuration file", suffixes = "def;defyaml", defaultValue = "")
   public void setConfigFileURL(java.net.URL theURL) {
     configFileURL = theURL;
   }
+
   public java.net.URL getConfigFileURL() {
     return configFileURL;
   }
   private java.net.URL configFileURL;
-  
+
   @CreoleParameter(comment = "Should this gazetteer differentiate on case",
-    defaultValue = "true")
+          defaultValue = "true")
   public void setCaseSensitive(Boolean yesno) {
     caseSensitive = yesno;
   }
+
   public Boolean getCaseSensitive() {
     return caseSensitive;
   }
   protected Boolean caseSensitive;
-  
+
   @CreoleParameter(comment = "For case insensitive matches, the locale to use for normalizing case",
-      defaultValue = "en")
-    public void setCaseConversionLanguage(String val) {
-      caseConversionLanguage = val;
-      caseConversionLocale = new Locale(val);
-    }
-    public String getCaseConversionLanguage() {
-      return caseConversionLanguage;
-    }
-    private String caseConversionLanguage;
-  
+          defaultValue = "en")
+  public void setCaseConversionLanguage(String val) {
+    caseConversionLanguage = val;
+    caseConversionLocale = new Locale(val);
+  }
+
+  public String getCaseConversionLanguage() {
+    return caseConversionLanguage;
+  }
+  private String caseConversionLanguage;
+
   // the feature separator string should probably move fully into the config file
   // once we move fully to yaml. As long as we use/support the def format too, we still
   // need it here though to provide at least the default.
   @CreoleParameter(
-      comment = "The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.",
-      defaultValue = "\\t"
-      )
+          comment = "The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.",
+          defaultValue = "\\t")
   @Optional
   public void setGazetteerFeatureSeparator(String sep) {
     gazetteerFeatureSeparator = sep;
   }
+
   public String getGazetteerFeatureSeparator() {
     return gazetteerFeatureSeparator;
   }
-  
   protected String gazetteerFeatureSeparator;
-
-  
   protected String unescapedSeparator = null;
   protected Locale caseConversionLocale = Locale.ENGLISH;
-
   protected Logger logger;
-
   //protected CharMapState initialState;
   protected GazStore gazStore;
-
   private static final int MAX_FEATURES_PER_ENTRY = 200;
-  
-  
   private static Pattern ws_pattern;
-  private static final String ws_chars = 
-    "\\u0009" // CHARACTER TABULATION
-                        + "\\u000A" // LINE FEED (LF)
-                        + "\\u000B" // LINE TABULATION
-                        + "\\u000C" // FORM FEED (FF)
-                        + "\\u000D" // CARRIAGE RETURN (CR)
-                        + "\\u0020" // SPACE
-                        + "\\u0085" // NEXT LINE (NEL) 
-                        + "\\u00A0" // NO-BREAK SPACE
-                        + "\\u1680" // OGHAM SPACE MARK
-                        + "\\u180E" // MONGOLIAN VOWEL SEPARATOR
-                        + "\\u2000" // EN QUAD 
-                        + "\\u2001" // EM QUAD 
-                        + "\\u2002" // EN SPACE
-                        + "\\u2003" // EM SPACE
-                        + "\\u2004" // THREE-PER-EM SPACE
-                        + "\\u2005" // FOUR-PER-EM SPACE
-                        + "\\u2006" // SIX-PER-EM SPACE
-                        + "\\u2007" // FIGURE SPACE
-                        + "\\u2008" // PUNCTUATION SPACE
-                        + "\\u2009" // THIN SPACE
-                        + "\\u200A" // HAIR SPACE
-                        + "\\u2028" // LINE SEPARATOR
-                        + "\\u2029" // PARAGRAPH SEPARATOR
-                        + "\\u202F" // NARROW NO-BREAK SPACE
-                        + "\\u205F" // MEDIUM MATHEMATICAL SPACE
-                        + "\\u3000" // IDEOGRAPHIC SPACE
-                        ;        
+  private static final String ws_chars =
+          "\\u0009" // CHARACTER TABULATION
+          + "\\u000A" // LINE FEED (LF)
+          + "\\u000B" // LINE TABULATION
+          + "\\u000C" // FORM FEED (FF)
+          + "\\u000D" // CARRIAGE RETURN (CR)
+          + "\\u0020" // SPACE
+          + "\\u0085" // NEXT LINE (NEL) 
+          + "\\u00A0" // NO-BREAK SPACE
+          + "\\u1680" // OGHAM SPACE MARK
+          + "\\u180E" // MONGOLIAN VOWEL SEPARATOR
+          + "\\u2000" // EN QUAD 
+          + "\\u2001" // EM QUAD 
+          + "\\u2002" // EN SPACE
+          + "\\u2003" // EM SPACE
+          + "\\u2004" // THREE-PER-EM SPACE
+          + "\\u2005" // FOUR-PER-EM SPACE
+          + "\\u2006" // SIX-PER-EM SPACE
+          + "\\u2007" // FIGURE SPACE
+          + "\\u2008" // PUNCTUATION SPACE
+          + "\\u2009" // THIN SPACE
+          + "\\u200A" // HAIR SPACE
+          + "\\u2028" // LINE SEPARATOR
+          + "\\u2029" // PARAGRAPH SEPARATOR
+          + "\\u202F" // NARROW NO-BREAK SPACE
+          + "\\u205F" // MEDIUM MATHEMATICAL SPACE
+          + "\\u3000" // IDEOGRAPHIC SPACE
+          ;
   private static final String ws_class = "[" + ws_chars + "]";
   private static final String ws_patternstring = ws_class + "+";
+  private static final String encoding = "UTF-8";
 
-  private static final  String encoding = "UTF-8";
-
-  
-  
   public GazetteerBase() {
     logger = Logger.getLogger(this.getClass().getName());
   }
@@ -195,22 +155,21 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     incrementGazStore();
     return this;
   }
+  protected static Map<String, GazStore> loadedGazStores = new HashMap<String, GazStore>();
 
-  protected static Map<String,GazStore> loadedGazStores = new HashMap<String,GazStore>();
-  
   private synchronized void incrementGazStore() throws ResourceInstantiationException {
     String uniqueGazStoreKey = genUniqueGazStoreKey();
-    logger.info("Creating gazetteer for "+getConfigFileURL());
+    logger.info("Creating gazetteer for " + getConfigFileURL());
     System.gc();
     long startTime = System.currentTimeMillis();
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     GazStore gs = loadedGazStores.get(uniqueGazStoreKey);
-    if(gs != null) { 
+    if (gs != null) {
       // The FSM for this file/parm combination already has been compiled, just
       // reuse it for this PR
       gazStore = gs;
-      gazStore.refcount++;      
-      logger.info("Reusing already generated GazStore for "+uniqueGazStoreKey);
+      gazStore.refcount++;
+      logger.info("Reusing already generated GazStore for " + uniqueGazStoreKey);
     } else {
       try {
         loadData();
@@ -220,38 +179,35 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
       }
       gazStore.refcount++;
       loadedGazStores.put(uniqueGazStoreKey, gazStore);
-      logger.info("New GazStore loaded for "+uniqueGazStoreKey);
-    }       
+      logger.info("New GazStore loaded for " + uniqueGazStoreKey);
+    }
     long endTime = System.currentTimeMillis();
     System.gc();
     long after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
-    logger.info("Gazetteer created in (secs):          "+((endTime-startTime)/1000.0));
-    logger.info("Heap memory increase (estimate,MB):   "+
-      String.format("%01.3f", ((after-before)/(1024.0*1024.0))));
+    logger.info("Gazetteer created in (secs):          " + ((endTime - startTime) / 1000.0));
+    logger.info("Heap memory increase (estimate,MB):   "
+            + String.format("%01.3f", ((after - before) / (1024.0 * 1024.0))));
     logger.info(gazStore.statsString());
   }
-  
+
   private synchronized void decrementGazStore() {
     String key = genUniqueGazStoreKey();
     GazStore gs = loadedGazStores.get(key);
     gs.refcount--;
     if (gs.refcount == 0) {
       loadedGazStores.remove(key);
-      logger.info("Removing GazStore for "+key);
-    }    
+      logger.info("Removing GazStore for " + key);
+    }
   }
 
   private synchronized void removeGazStore() {
     String key = genUniqueGazStoreKey();
     loadedGazStores.remove(key);
-    logger.info("reInit(): force-removing GazStore for "+key);
+    logger.info("reInit(): force-removing GazStore for " + key);
   }
-  
-  
-  
+
   protected String genUniqueGazStoreKey() {
-    return 
-      " cs="+caseSensitive + " url="+ configFileURL+" be="+backendNr+" lang="+caseConversionLanguage;
+    return " cs=" + caseSensitive + " url=" + configFileURL + " lang=" + caseConversionLanguage;
   }
 
   @Override
@@ -262,8 +218,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
   public void save(File whereTo) throws IOException {
     gazStore.save(whereTo);
   }
-  
-  
+
   @Override
   /**
    */
@@ -274,174 +229,147 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     init();
   }
 
-  protected void loadData() throws UnsupportedEncodingException, IOException, ResourceInstantiationException  {
+  protected void loadData() throws UnsupportedEncodingException, IOException, ResourceInstantiationException {
     // if we find the cache file, load it, else load the original files and create the cache file
-    
+
     File configFile = gate.util.Files.fileFromURL(configFileURL);
-    
+
     // check the extension and determine if we have an old format .def file or 
     // a new format .defyaml file
     String name = configFile.getName();
-    int i = name.lastIndexOf('.')+1;
-    if(i < 0) {
+    int i = name.lastIndexOf('.') + 1;
+    if (i < 0) {
       throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
     }
     String ext = name.substring(i);
-    if(ext.isEmpty() || !(ext.equals("def") || ext.equals("defyaml"))) {
-      throw new GateRuntimeException("Config file must have a .def or .defyaml extension");      
+    if (ext.isEmpty() || !(ext.equals("def") || ext.equals("defyaml"))) {
+      throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
     }
-    if(ext.equals("def")) {
+    if (ext.equals("def")) {
       loadDataFromDef(configFile);
-    } else { 
+    } else {
       loadDataFromYaml(configFile);
     }
   }
-  
-  protected void loadDataFromDef(File configFile) throws IOException {  
+
+  protected void loadDataFromDef(File configFile) throws IOException {
     String configFileName = configFile.getAbsolutePath();
     String gazbinFileName = configFileName.replaceAll("\\.def$", ".gazbin");
-    if(configFileName.equals(gazbinFileName)) {
+    if (configFileName.equals(gazbinFileName)) {
       throw new GateRuntimeException("Config file must have def or defyaml extension");
     }
     File gazbinFile = new File(gazbinFileName);
-   
-   if(backendNr == 3 && useCache && gazbinFile.exists()) {
-     gazStore = new GazStoreTrie3();
-     gazStore = gazStore.load(gazbinFile);
-   
-   } else {
-    if(backendNr == 1) {
-      gazStore = new GazStoreTrie1();
-    } else if (backendNr == 2) {
-      gazStore = new GazStoreTrie2();      
-    } else if (backendNr == 3) {
-      gazStore = new GazStoreTrie3();      
+
+    if (gazbinFile.exists()) {
+      gazStore = new GazStoreTrie3();
+      gazStore = gazStore.load(gazbinFile);
+
     } else {
-      throw new GateRuntimeException("Invalid backend number: "+backendNr);
-    }
-    BufferedReader defReader =
-      new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
-    String line;
-    //logger.info("Loading data");
-    while (null != (line = defReader.readLine())) {
-       String[] fields = line.split(":");
-       if(fields.length == 0) {
-         System.err.println("Empty line in file "+configFileURL);
-       } else {
-         String listFileName = "";
-         String majorType = "";
-         String minorType = "";
-         String languages = "";
-         String annotationType = ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
-         listFileName = fields[0];
-         if(fields.length > 1) {
-           majorType = fields[1];
-         }
-         if(fields.length > 2) {
-           minorType = fields[2];
-         }
-         if(fields.length > 3) {
-           languages = fields[3];
-         }
-         if(fields.length > 4) {
-           annotationType = fields[4];
-         }
-         if(fields.length > 5) {
-           defReader.close();
-           throw new GateRuntimeException("Line has more that 5 fields in def file "+configFileURL);
-         }
-         logger.debug("Reading from "+listFileName+", "+majorType+"/"+minorType+"/"+languages+"/"+annotationType);
-         //logger.info("DEBUG: loading data from "+listFileName);
-         loadListFile(listFileName,majorType,minorType,languages,annotationType);
-      }
-    } //while
-    defReader.close();
-    gazStore.compact();
-    logger.info("Gazetteer loaded from list files");
-    
-    if(backendNr == 3 && useCache) {
+      gazStore = new GazStoreTrie3();
+      BufferedReader defReader =
+              new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
+      String line;
+      //logger.info("Loading data");
+      while (null != (line = defReader.readLine())) {
+        String[] fields = line.split(":");
+        if (fields.length == 0) {
+          System.err.println("Empty line in file " + configFileURL);
+        } else {
+          String listFileName = "";
+          String majorType = "";
+          String minorType = "";
+          String languages = "";
+          String annotationType = ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
+          listFileName = fields[0];
+          if (fields.length > 1) {
+            majorType = fields[1];
+          }
+          if (fields.length > 2) {
+            minorType = fields[2];
+          }
+          if (fields.length > 3) {
+            languages = fields[3];
+          }
+          if (fields.length > 4) {
+            annotationType = fields[4];
+          }
+          if (fields.length > 5) {
+            defReader.close();
+            throw new GateRuntimeException("Line has more that 5 fields in def file " + configFileURL);
+          }
+          logger.debug("Reading from " + listFileName + ", " + majorType + "/" + minorType + "/" + languages + "/" + annotationType);
+          //logger.info("DEBUG: loading data from "+listFileName);
+          loadListFile(listFileName, majorType, minorType, languages, annotationType);
+        }
+      } //while
+      defReader.close();
+      gazStore.compact();
+      logger.info("Gazetteer loaded from list files");
+
       gazStore.save(gazbinFile);
-    }
     } // gazbinFile exists ... else
   }
 
-  protected void loadDataFromYaml(File configFile) throws IOException {  
+  protected void loadDataFromYaml(File configFile) throws IOException {
     String configFileName = configFile.getAbsolutePath();
     String gazbinFileName = configFileName.replaceAll("\\.defyaml$", ".gazbin");
-    if(configFileName.equals(gazbinFileName)) {
+    if (configFileName.equals(gazbinFileName)) {
       throw new GateRuntimeException("Config file must have def or defyaml extension");
     }
     File gazbinFile = new File(gazbinFileName);
-   
+
     String gazbinDir = gazbinFile.getParent();
     String gazbinName = gazbinFile.getName();
-    
+
     // Always read the yaml file so we can get any special location of the cache
     // file or figure out that we should not try to load the cache file
     Yaml yaml = new Yaml();
     BufferedReader yamlReader =
-        new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
+            new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
     Object configObject = yaml.load(yamlReader);
 
     List<Map> configListFiles = null;
-    if(configObject instanceof Map) {
-      Map<String,Object> configMap = (Map<String,Object>)configObject;
-      String configCacheDirName = (String)configMap.get("cacheDir");
-      if(configCacheDirName != null) {
+    if (configObject instanceof Map) {
+      Map<String, Object> configMap = (Map<String, Object>) configObject;
+      String configCacheDirName = (String) configMap.get("cacheDir");
+      if (configCacheDirName != null) {
         gazbinDir = configCacheDirName;
       }
-      String configCacheFileName = (String)configMap.get("chacheFile");
-      if(configCacheFileName != null) {
+      String configCacheFileName = (String) configMap.get("chacheFile");
+      if (configCacheFileName != null) {
         gazbinName = configCacheFileName;
       }
-      gazbinFile = new File(new File(gazbinDir),gazbinName);
-      Integer configBackendNr = (Integer)configMap.get("backendNr");
-      if(configBackendNr != null) {
-        backendNr = configBackendNr;
-      }
-      configListFiles = (List<Map>)configMap.get("listFiles");
-    } else if(configObject instanceof List) {
-      configListFiles = (List<Map>)configObject;
+      gazbinFile = new File(new File(gazbinDir), gazbinName);
+      configListFiles = (List<Map>) configMap.get("listFiles");
+    } else if (configObject instanceof List) {
+      configListFiles = (List<Map>) configObject;
     } else {
-      throw new GateRuntimeException("Strange YAML format for the defyaml file "+configFileURL);
+      throw new GateRuntimeException("Strange YAML format for the defyaml file " + configFileURL);
     }
-    
+
     // if we want to load the cache and it exists, load it
-    if(backendNr == 3 && useCache && gazbinFile.exists()) {
+    if (gazbinFile.exists()) {
       gazStore = new GazStoreTrie3();
-      gazStore = gazStore.load(gazbinFile);   
-   } else {
-     // otherwise process the files listed in the yaml file 
-    if(backendNr == 1) {
-      gazStore = new GazStoreTrie1();
-    } else if (backendNr == 2) {
-      gazStore = new GazStoreTrie2();      
-    } else if (backendNr == 3) {
-      gazStore = new GazStoreTrie3();      
+      gazStore = gazStore.load(gazbinFile);
     } else {
-      throw new GateRuntimeException("Invalid backend number: "+backendNr);
-    }
-    // go through all the list and tsv files to load and load them
-    for(Map configListFile : configListFiles) {
-      // TODO!!!
-    
-         //logger.debug("Reading from "+listFileName+", "+majorType+"/"+minorType+"/"+languages+"/"+annotationType);
-         //logger.info("DEBUG: loading data from "+listFileName);
-         //loadListFile(listFileName,majorType,minorType,languages,annotationType);
-    } //while
-    gazStore.compact();
-    logger.info("Gazetteer loaded from list files");
-    
-    if(backendNr == 3 && useCache) {
+      gazStore = new GazStoreTrie3();
+      // go through all the list and tsv files to load and load them
+      for (Map configListFile : configListFiles) {
+        // TODO!!!
+        //logger.debug("Reading from "+listFileName+", "+majorType+"/"+minorType+"/"+languages+"/"+annotationType);
+        //logger.info("DEBUG: loading data from "+listFileName);
+        //loadListFile(listFileName,majorType,minorType,languages,annotationType);
+      } //while
+      gazStore.compact();
+      logger.info("Gazetteer loaded from list files");
+
       gazStore.save(gazbinFile);
-    }
     } // gazbinFile exists ... else
   }
-  
-  
-  void loadListFile(String listFileName,String majorType,String minorType,
-      String languages, String annotationType) 
-  throws MalformedURLException, IOException {
+
+  void loadListFile(String listFileName, String majorType, String minorType,
+          String languages, String annotationType)
+          throws MalformedURLException, IOException {
 
     // TODO: the separator character should become a parameter that 
     // can be set per list file!
@@ -449,23 +377,23 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     // one wit a global default
     if (gazetteerFeatureSeparator != null && !gazetteerFeatureSeparator.isEmpty()) {
       unescapedSeparator = Strings.unescape(gazetteerFeatureSeparator);
-    } 
-    
+    }
+
     //logger.info("Loading list file "+listFileName);
-    URL lurl = new URL(configFileURL,listFileName);
+    URL lurl = new URL(configFileURL, listFileName);
     FeatureMap listFeatures = Factory.newFeatureMap();
     listFeatures.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, majorType);
     listFeatures.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, minorType);
-    if(languages != null) {
+    if (languages != null) {
       listFeatures.put(LOOKUP_LANGUAGE_FEATURE_NAME, languages);
     }
-    gazStore.addListInfo(annotationType,lurl.toString(),listFeatures);
+    gazStore.addListInfo(annotationType, lurl.toString(), listFeatures);
     int infoIndex = gazStore.getListInfos().size() - 1;
     //Lookup defaultLookup = new Lookup(listFileName, majorType, minorType, 
     //        languages, annotationType);
     BufferedReader listReader = null;
-    if(listFileName.endsWith(".gz")) {
-      listReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(lurl.openStream()),encoding));
+    if (listFileName.endsWith(".gz")) {
+      listReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(lurl.openStream()), encoding));
     } else {
       listReader = new BomStrippingInputStreamReader(lurl.openStream(), encoding);
     }
@@ -480,67 +408,65 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
       // the part before the first separator to be the entry and extract
       // the features from everything that comes after it.
       // All this only, if the separator is set at all
-      if(unescapedSeparator != null) {
-      int firstSepIndex = line.indexOf(unescapedSeparator);
-      if(firstSepIndex > -1) {
-        entry = line.substring(0,firstSepIndex);
-        // split the rest of the line real fast
-        int lastSepIndex = firstSepIndex;
-        int nrFeatures = 0;        
-        String[] featureBuffer = new String[MAX_FEATURES_PER_ENTRY*2]; 
-        int nextSepIndex = 0;
-        do {
-          //logger.info("Feature nr: "+(nrFeatures+1));
-          // check if we already have maximum number of features allows
-          if(nrFeatures == MAX_FEATURES_PER_ENTRY) {
-            throw new GateRuntimeException(
-                "More than "+MAX_FEATURES_PER_ENTRY+" features in gazetteer entry in list "+listFileName+
-                " line "+lines);
+      if (unescapedSeparator != null) {
+        int firstSepIndex = line.indexOf(unescapedSeparator);
+        if (firstSepIndex > -1) {
+          entry = line.substring(0, firstSepIndex);
+          // split the rest of the line real fast
+          int lastSepIndex = firstSepIndex;
+          int nrFeatures = 0;
+          String[] featureBuffer = new String[MAX_FEATURES_PER_ENTRY * 2];
+          int nextSepIndex = 0;
+          do {
+            //logger.info("Feature nr: "+(nrFeatures+1));
+            // check if we already have maximum number of features allows
+            if (nrFeatures == MAX_FEATURES_PER_ENTRY) {
+              throw new GateRuntimeException(
+                      "More than " + MAX_FEATURES_PER_ENTRY + " features in gazetteer entry in list " + listFileName
+                      + " line " + lines);
+            }
+            // get the index of the next separator
+            nextSepIndex = line.indexOf(unescapedSeparator, lastSepIndex + 1);
+            if (nextSepIndex < 0) { // if none found, use beyond end of String
+              nextSepIndex = line.length();
+            }
+            // find the first equals character in the string section for this feature
+            int equalsIndex = line.indexOf('=', lastSepIndex + 1);
+            //logger.info("lastSepIndex="+lastSepIndex+", nextSepIndex="+nextSepIndex+", equalsIndex="+equalsIndex);
+            // if we do not find one or only after the end of this feature string,
+            // make a fuss about it
+            if (equalsIndex < 0 || equalsIndex >= nextSepIndex) {
+              throw new GateRuntimeException(
+                      "Not a proper feature=value in gazetteer list " + listFileName
+                      + " line " + lines + "\nlooking at " + line.substring(lastSepIndex, nextSepIndex)
+                      + " lastSepIndex is " + lastSepIndex
+                      + " nextSepIndex is " + nextSepIndex
+                      + " equals at " + equalsIndex);
+            }
+            // add the key/value to the features string array: 
+            // key to even positions, starting with 0, value to uneven starting with 1 
+            nrFeatures++;
+            featureBuffer[nrFeatures * 2 - 2] = line.substring(lastSepIndex + 1, equalsIndex);
+            featureBuffer[nrFeatures * 2 - 1] = line.substring(equalsIndex + 1, nextSepIndex);
+            lastSepIndex = nextSepIndex;
+          } while (nextSepIndex < line.length());
+          if (nrFeatures > 0) {
+            entryFeatures = new String[nrFeatures * 2];
+            for (int i = 0; i < entryFeatures.length; i++) {
+              entryFeatures[i] = featureBuffer[i];
+            }
+          } else {
+            entryFeatures = new String[0];
           }
-          // get the index of the next separator
-          nextSepIndex = line.indexOf(unescapedSeparator,lastSepIndex+1);
-          if(nextSepIndex < 0) { // if none found, use beyond end of String
-            nextSepIndex = line.length();
-          }
-          // find the first equals character in the string section for this feature
-          int equalsIndex = line.indexOf('=',lastSepIndex+1);
-          //logger.info("lastSepIndex="+lastSepIndex+", nextSepIndex="+nextSepIndex+", equalsIndex="+equalsIndex);
-          // if we do not find one or only after the end of this feature string,
-          // make a fuss about it
-          if(equalsIndex < 0 || equalsIndex >= nextSepIndex) {
-            throw new GateRuntimeException(
-                "Not a proper feature=value in gazetteer list "+listFileName+
-                " line "+lines+"\nlooking at "+line.substring(lastSepIndex,nextSepIndex)+
-                " lastSepIndex is "+lastSepIndex+
-                " nextSepIndex is "+nextSepIndex+
-                " equals at "+equalsIndex);
-          }
-          // add the key/value to the features string array: 
-          // key to even positions, starting with 0, value to uneven starting with 1 
-          nrFeatures++;
-          featureBuffer[nrFeatures*2-2] = line.substring(lastSepIndex+1,equalsIndex);
-          featureBuffer[nrFeatures*2-1] = line.substring(equalsIndex+1,nextSepIndex);
-          lastSepIndex = nextSepIndex;
-        } while(nextSepIndex < line.length());
-        if(nrFeatures > 0) {
-          entryFeatures = new String[nrFeatures*2];
-          for(int i = 0; i<entryFeatures.length; i++) {
-            entryFeatures[i] = featureBuffer[i];
-          }
-        } else {
-          entryFeatures = new String[0];
         }
-      }     
       } // have separator 
       // entry Features are passed as null if there are no entry features
-      addLookup(entry, infoIndex,entryFeatures);
+      addLookup(entry, infoIndex, entryFeatures);
     } // while
     listReader.close();
     //logger.info("DEBUG: lines read "+lines);
-    logger.debug("Lines read: "+lines);
+    logger.debug("Lines read: " + lines);
   }
-
-
 
   public void addLookup(String text, int listInfoIndex, String[] entryFeatures) {
     // 1) instead of translating every character that is not within a word
@@ -551,21 +477,21 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     // the whole string to both only upper and only lower case first, then
     // compare the lengths. If the lengths differ, add both in addition to
     // the original!
-    
+
     String textNormalized = new String(text).trim();
     // convert anything that is a sequence of whitespace to a single space
     // WAS: textNormalized = textNormalized.replaceAll("  +", " ");
     textNormalized = ws_pattern.matcher(textNormalized).replaceAll(" ");
-    if(textNormalized.isEmpty()) {
+    if (textNormalized.isEmpty()) {
       //logger.info("Ignoring, is empty");
       return;
     }
-    
+
     // TODO: at some point this should get changed to allow for both totally
     // ignoring case (as now) and for matching either the original or a 
     // case-normalization (in the runtime). This would also need a setting
     // for specifying what the case normalization should be (e.g. UPPERCASE).
-    
+
     // For now, we always normalize to upper case when case is ignored. 
     // The gazetteer should contain lowercase or firstCaseUpper words, but
     // better not ALLCAPS in order for lower case characters which get mapped
@@ -573,12 +499,12 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     // For these special cases, we add two UPPERCASE normalizations:
     // the one with the two characters and the one where the char.toUpperCase 
     // is used.
-    if(!caseSensitive) {
+    if (!caseSensitive) {
       String textNormalizedUpper = textNormalized.toUpperCase(caseConversionLocale);
-      if(textNormalizedUpper.length() != textNormalized.length()) {
+      if (textNormalizedUpper.length() != textNormalized.length()) {
         gazStore.addLookup(textNormalizedUpper, listInfoIndex, entryFeatures);
         char[] textChars2 = new char[textNormalized.length()];
-        for(int i=0; i<textNormalized.length(); i++) {
+        for (int i = 0; i < textNormalized.length(); i++) {
           textChars2[i] = Character.toUpperCase(textNormalized.charAt(i));
         }
         gazStore.addLookup(new String(textChars2), listInfoIndex, entryFeatures);
@@ -590,32 +516,31 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser
     } else {
       gazStore.addLookup(textNormalized, listInfoIndex, entryFeatures);
     }
-    
+
 
   } // addLookup
 
   /**
-   * For a given lookups iterator, return a list of feature maps filled
-   * with the information from those lookups.
+   * For a given lookups iterator, return a list of feature maps filled with the
+   * information from those lookups.
+   *
    * @param lookups
    * @return
    */
   public List<FeatureMap> lookups2FeatureMaps(Iterator<Lookup> lookups) {
     List<FeatureMap> fms = new ArrayList<FeatureMap>();
-    if(lookups == null) {
+    if (lookups == null) {
       return fms;
     }
-    while(lookups.hasNext()) {
+    while (lookups.hasNext()) {
       FeatureMap fm = Factory.newFeatureMap();
       Lookup currentLookup = lookups.next();
       gazStore.addLookupListFeatures(fm, currentLookup);
-      fm.put("_listnr",gazStore.getListInfoIndex(currentLookup));
+      fm.put("_listnr", gazStore.getListInfoIndex(currentLookup));
       gazStore.addLookupEntryFeatures(fm, currentLookup);
       fms.add(fm);
     }
     return fms;
   }
-  
-
 } // ExtendedGazetteer
 

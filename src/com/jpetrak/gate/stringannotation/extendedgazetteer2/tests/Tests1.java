@@ -29,10 +29,8 @@ import org.junit.Test;
 
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.FeatureGazetteer;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.GazStore;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.Lookup;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.State;
-import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie2.GazStoreTrie2;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.GazStoreTrie3;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.StoreArrayOfCharArrays;
 import com.jpetrak.gate.stringannotation.extendedgazetteer2.trie3.StoreCharMapPhase1;
@@ -54,7 +52,7 @@ public class Tests1 {
       Gate.getCreoleRegister().registerDirectories(
               pluginHome.toURI().toURL());
       testingDir = new File(pluginHome,"tests");
-      assertTrue(testingDir.exists());
+      assertTrue("Directory 'tests' does not exist",testingDir.exists());
       FileFilter fileFilter = new WildcardFileFilter("*.gazbin");
       File[] files = testingDir.listFiles(fileFilter);
       for(File file : files) {
@@ -139,31 +137,12 @@ public class Tests1 {
   
   
   @Test
-  public void testLookupTrie2() {
-    GazStoreTrie2 gs = new GazStoreTrie2();
-    gs.runImplementationTests();
-  }
-  @Test
   public void testLookupTrie3() {
     GazStoreTrie3 gs = new GazStoreTrie3();
+    // delegate to the method in GazStoreTrie3 ...
     gs.runImplementationTests();
   }
   
-  @Test
-  public void testTrie2() {
-    GazStore gs = new GazStoreTrie2();
-    FeatureMap fm = Factory.newFeatureMap();
-    fm.put("listFeature1","value1");
-    fm.put("listFeature2","value2");
-    int info1 = gs.addListInfo("Type1", "URL1", fm);
-    String[] keyvals1 = new String[]{"key1","val1","key2","","k3","valuenumberthree"};
-    /*
-    State st1 = gs.addLookupOld("asdf", info1, keyvals1);
-    Iterator<Lookup> it1 = gs.getLookups(st1);
-    assertEquals(true,it1.hasNext());
-    Lookup l1 = it1.next();
-    */
-  }
   @Test
   public void testTrie3() {
     GazStoreTrie3 gs = new GazStoreTrie3();
@@ -187,33 +166,14 @@ public class Tests1 {
     assertEquals(1,nrLookups);
   }
   
-  // TODO: the tests for BE1 and BE2 cannot be the same as for BE3 any more because
-  // BE3 does now check for duplicate identical lines within a list and BE1/2 do not.
-  // Since the test gazetteer contains duplicate entries, only BE3 gives the correct numbers!
-  /*
-  @Test
-  public void testGazetteerApplication1BE1() 
-      throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    do_testGazetteerApplication1(1);
-  }
-  @Test
-  public void testGazetteerApplication1BE2() 
-      throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    do_testGazetteerApplication1(2);
-  }
-  */
   @Test
   public void testGazetteerApplication1BE3() 
       throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    do_testGazetteerApplication1(3);
-  }
-  public void do_testGazetteerApplication1(int backendNr) throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    System.out.println("Running gazetteer application test 1 for backend "+backendNr);
+    System.out.println("Running Gazetteer application test 1");
     FeatureMap parms = Factory.newFeatureMap();
     File defFile = new File(testingDir,"extgaz2.def");
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
-    parms.put("backendNr",backendNr);
     ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     // load the document
@@ -233,11 +193,7 @@ public class Tests1 {
     AnnotationSet sentences = doc.getAnnotations().get("Sentence");
     assertEquals(4,sentences.size());
     lookups = doc.getAnnotations().get("OutType");
-    if(backendNr == 3) {
-      assertEquals(12,lookups.size());
-    } else {
-      assertEquals(14,lookups.size());
-    }
+    assertEquals(12,lookups.size());
     int i = 1;
     FeatureMap fm;
     long from;
@@ -273,32 +229,16 @@ public class Tests1 {
     eg.execute();
     lookups = doc.getAnnotations().get("OutType");
     assertEquals(26,lookups.size());
-    System.out.println("Gazetteer application test 1 finished for backedn "+backendNr);
+    System.out.println("Gazetteer application test 1 finished");
   }
   
-  @Test
-  public void testGazetteerApplication2BE1() 
-      throws ResourceInstantiationException, ExecutionException, IOException {
-    do_testGazetteerApplication2(1);
-  }
-  @Test
-  public void testGazetteerApplication2BE2() 
-      throws ResourceInstantiationException, ExecutionException, IOException {
-    do_testGazetteerApplication2(2);
-  }
   public void testGazetteerApplication2BE3() 
       throws ResourceInstantiationException, ExecutionException, IOException {
-    do_testGazetteerApplication2(3);
-  }
-  
-  public void do_testGazetteerApplication2(int backendNr) 
-      throws ResourceInstantiationException, ExecutionException, IOException {
-    System.out.println("Running gazetteer application test 2 for news1pre for backend "+backendNr);
+    System.out.println("Running gazetteer application test 2 for news1pre");
     FeatureMap parms = Factory.newFeatureMap();
     File defFile = new File(testingDir,"annie/lists.def");
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
-    parms.put("backendNr",backendNr);
     ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
     // load the document
@@ -324,33 +264,21 @@ public class Tests1 {
     int falsePositives = differ.getFalsePositivesStrict();
     int missing = differ.getMissing();
     System.out.println("Diff: correct="+correct+" false positives="+falsePositives+" missing="+missing);
-    File outFile = new File(testingDir,"news1pre_procBE"+backendNr+".xml");
+    File outFile = new File(testingDir,"news1pre_procBE.xml");
     FileUtils.writeStringToFile(outFile, doc.toXml(),"UTF-8");
-    // the 33 false Positives come from duplicates that are introduced from several list files
-    // and which are not removed by the ExtGaz
-    // the 2 missing come from matches within hyphenated words (after a hyphen) which are
-    // not found by ExtGaz because they occur inside a single Token (hyphens do not split up tokens)
     assertEquals(194,correct);
-    // The backend 2 does not do any duplicate tests at all, therefore the duplicate entry "N. Ireland" in
-    // provinces.lst shows up twice for BE2, but only once for BE1
-    if(backendNr==1) {
-      assertEquals(32,falsePositives);
-    } else {
-      assertEquals(33,falsePositives);
-    }
+    assertEquals(33,falsePositives);    
     assertEquals(2,missing);
-    System.out.println("Gazetteer application test 2 finished for backend nr: "+backendNr);
+    System.out.println("Gazetteer application test 2 finished");
   }
 
   @Test
   public void testFeatureGazetteer1() throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    int backendNr = 3;
-    System.out.println("Running FEATURE GAZETTEER application test for backend "+backendNr);
+    System.out.println("Running FEATURE GAZETTEER application test");
     FeatureMap parms = Factory.newFeatureMap();
     File defFile = new File(testingDir,"extgaz2.def");
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
-    parms.put("backendNr",backendNr);
     FeatureGazetteer eg = (FeatureGazetteer)Factory.createResource(
             "com.jpetrak.gate.stringannotation.extendedgazetteer2.FeatureGazetteer", parms);
     // test matching directly

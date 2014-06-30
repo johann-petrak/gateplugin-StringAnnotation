@@ -36,8 +36,8 @@ public class Tests2 {
       System.out.println("Plugin home directory is "+pluginHome.getAbsolutePath());
       Gate.getCreoleRegister().registerDirectories(
               pluginHome.toURI().toURL());
-      testingDir = new File(pluginHome,"testbig");
-      assertTrue(testingDir.exists());
+      testingDir = new File(pluginHome,"tests");
+      assertTrue("Directory 'tests' does not exist",testingDir.exists());
     } else {
       System.out.println("Already initialized ...");
     }
@@ -51,65 +51,13 @@ public class Tests2 {
 
   
   @Test
-  public void testGazetteerApplicationBig_BE1() 
-      throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    System.out.println("Running big gazetteer application test, backend 1");
-    FeatureMap parms = Factory.newFeatureMap();
-    File defFile = new File(testingDir,"pref_en_500K.def");    
-    URL gazURL = defFile.toURI().toURL();
-    parms.put("configFileURL", gazURL);
-    parms.put("backendNr",1);
-    System.gc();
-    long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
-    System.out.println("Memory used before loading gazetteer: "+before);
-    long startTime = System.currentTimeMillis();
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
-            "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
-    long endTime = System.currentTimeMillis();
-    System.gc();
-    long after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
-    Factory.deleteResource(eg);
-    eg = null;
-    System.out.println("Memory used after loading gazetteer: "+after);
-    System.out.println("Elapsed time: "+((endTime-startTime)/1000.0));
-    System.out.println("Memory used up in between: "+(after-before));
-    System.out.println("Big gazetteer application test finished");
-  }
-
-  @Test
-  public void testGazetteerApplicationBig_BE2() 
-      throws MalformedURLException, ResourceInstantiationException, ExecutionException {
-    System.out.println("Running big gazetteer application test, backend 2");
-    FeatureMap parms = Factory.newFeatureMap();
-    File defFile = new File(testingDir,"pref_en_500K.def");
-    URL gazURL = defFile.toURI().toURL();
-    parms.put("configFileURL", gazURL);
-    parms.put("backendNr",2);
-    System.gc();
-    long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
-    System.out.println("Memory used before loading gazetteer: "+before);
-    long startTime = System.currentTimeMillis();
-    ExtendedGazetteer2 eg = (ExtendedGazetteer2)Factory.createResource(
-            "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2", parms);
-    long endTime = System.currentTimeMillis();
-    System.gc();
-    long after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
-    Factory.deleteResource(eg);
-    eg = null;
-    System.out.println("Memory used after loading gazetteer: "+after);
-    System.out.println("Elapsed time: "+((endTime-startTime)/1000.0));
-    System.out.println("Memory used up in between: "+(after-before));
-    System.out.println("Big gazetteer application test finished");
-  }
-  @Test
   public void testGazetteerApplicationBig_BE3() 
       throws ResourceInstantiationException, ExecutionException, IOException {
-    System.out.println("Running big gazetteer application test, backend 3");
+    System.out.println("Running big gazetteer application test");
     FeatureMap parms = Factory.newFeatureMap();
     File defFile = new File(testingDir,"pref_en_500K.def");
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
-    parms.put("backendNr",3);
     System.gc();
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Memory used before loading gazetteer: "+before);

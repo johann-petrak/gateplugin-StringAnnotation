@@ -8,17 +8,18 @@ import it.unimi.dsi.fastutil.chars.CharBigArrayBigList;
 /**
  * This represents a store that can add and retrieve char[] elements. Each char[] chunk
  * is identified by an int index which is returned when adding the chunk and which
- * can be used to get it back. The number of chunks in a store is limited to 2^31, and
+ * must be used to get it back. The number of chunks in a store is limited to 2^31, and
  * the length of each chunk is also limited to 2^31, but the total amount of chars in
  * the store can exceed 2^32 (unsigned 32 bit).
  * <p>
  *  The store supports storing the following:
  *  <ul>
- *  <li>Varying length chunks. These consist of two chars that encode the length of the data 
- *  (not including the length field) followed  by the data
- *  <li>Fixed length chunks: just data, the client must know the length and supply it both when
- *  adding and retrieving data
- *  <li>Lists: each list consists of one or more elements of varying length chunks. The first 
+ *  <li>Varying length chunks. Internally, these are stored by two characters representing
+ *  the length of the data followed by the data itself. 
+ *  <li>Fixed length chunks. The data is stored as-is, but the client must know
+ *  the length of the data at retrieval time!
+ *  <li>Lists: each list consists of one or more elements of varying length chunks. 
+ *  Internally, the first 
  *  of a list consists of the the chunk length, the list size, the index of the next element chunk
  *   and the actual chunk data for the first element. Elements 2-N consist of the chunk length,
  *   the index of the next element chunk and the actual chunk data. Next chunk index and in the 
@@ -41,10 +42,12 @@ public class StoreArrayOfCharArrays implements Serializable {
   private char[] zeroChars = Utils.int2TwoChars(0); 
   private char[] oneChars = Utils.int2TwoChars(1);
   
+  //// VARIABLE LENGTH DATA METHODS
+  
   /**
-   * Add some data and get back the index under which we can get it back
+   * Add variable length data and get back the index under which we can get it back
    * @param data
-   * @return
+   * @return index where the data is stored
    */
   public int addData(char[] data) {
     // remember where we store the data
@@ -61,11 +64,31 @@ public class StoreArrayOfCharArrays implements Serializable {
     return oldIndex;
   }
 
+  /** 
+   * Get variable length data from at the given index.
+   * @param index 
+   * @return char array of data
+   */
+  public char[] getData(int index) {
+    // retrieve the length 
+    int l = Utils.twoChars2Int(theList.get(index), theList.get(index+1));
+    // now retrieve the characters for this data block
+    char data[] = new char[l];
+    for(int i=0; i<l; i++) {
+      data[i] = theList.get(index+2+i);
+    }
+    return data;
+  }
+
+  
+  //// FIXED LENGTH DATA METHODS
+  
   /**
-   * Add some data and get back the index under which we can get it back. This will 
+   * Add fixed length data and get back the index under which we can get it back. This will 
    * add a chunk of data of known length to the store: no length is stored in the 
    * store for this chunk. This chunk can only be retrieved with the getFixedLengthData
-   * method.
+   * method which will have to specify the length at retrieval time. The length
+   * has thus to be known at retrieval time by some means external to the store.
    * 
    * @param data
    * @return
@@ -79,32 +102,8 @@ public class StoreArrayOfCharArrays implements Serializable {
     return oldIndex;
   }
   
-  public int replaceFixedLengthData(int index, char[] data) {
-    for(int i = 0; i<data.length; i++) {
-      theList.set(index+i,data[i]);
-    }
-    return index;
-  }
- 
-  
   /** 
-   * Get the data from at the given index.
-   * @param index
-   * @return
-   */
-  public char[] getData(int index) {
-    // retrieve the length 
-    int l = Utils.twoChars2Int(theList.get(index), theList.get(index+1));
-    // now retrieve the characters for this data block
-    char data[] = new char[l];
-    for(int i=0; i<l; i++) {
-      data[i] = theList.get(index+2+i);
-    }
-    return data;
-  }
-
-  /** 
-   * Get data of known length from at the given index.
+   * Get fixed length data of known length stored at the given index.
    * @param index
    * @return
    */
@@ -117,11 +116,33 @@ public class StoreArrayOfCharArrays implements Serializable {
   }
   
   /**
-   * Add a new list to the store and return its index. After this, a list with 
-   * length of 1 is stored.
+   * Replace fixed length data with new data. The length of the new date
+   * must be identical to the length of the data that was originally stored
+   * at this index.
    * 
+   * @param index
    * @param data
-   * @return
+   * @return the same index is passed
+   */
+  public int replaceFixedLengthData(int index, char[] data) {
+    for(int i = 0; i<data.length; i++) {
+      theList.set(index+i,data[i]);
+    }
+    return index;
+  }
+ 
+  /// LIST DATA METHODS
+  /// These methods store elements of a list of elements in the store.
+  /// Each element is a char[] data block. Each list is stored at some index
+  /// and has n > 0 elements which can be retrieved by the pair 
+  /// (index,element_number)
+  
+  /**
+   * Add the first element of a new list to the store and return its index. 
+   * After this, a list with length of 1 is stored.
+   * 
+   * @param data the first element of the list 
+   * @return the index of the list in the store
    */
   public int addListData(char[] data) {
     // create the special first list entry: 
@@ -146,12 +167,15 @@ public class StoreArrayOfCharArrays implements Serializable {
   }
   
   /**
-   * Append additional data blocks to a list that already exists in the store at 
-   * the given index. if index is <=0, add a new list.
+   * Append an additional data blocks to a list that already exists.
+   * If there already is a list stored at the given index, the data will
+   * be added as a new element. If there is no list at the given index,
+   * the data will be added as the first element and the actual new index
+   * of that new list will be returned.
    * 
-   * @param index
-   * @param data
-   * @return
+   * @param index index of the list to which to add the new element
+   * @param data the element to add
+   * @return the index of the existing list or a new index if a new list had to be created
    */
   // TODO: instead of doing getData to get the element indices, just directly access
   // the characters
@@ -207,9 +231,10 @@ public class StoreArrayOfCharArrays implements Serializable {
   
   /**
    * Return the list element at the given index.
-   * @param index
-   * @param element
-   * @return
+   * 
+   * @param index index of the list
+   * @param element element number
+   * @return element data
    */
   public char[] getListData(int index, int element) {
     // get the first block which must exist
@@ -278,6 +303,8 @@ public class StoreArrayOfCharArrays implements Serializable {
   /**
    * Check if the characters in the store, starting at index and having length length,
    * are identical to the characters of the chunk. 
+   * This compares the raw data characters starting at the index and does not
+   * consider list elements or other special data.
    * @param index
    * @param length
    * @param chunk
@@ -296,9 +323,12 @@ public class StoreArrayOfCharArrays implements Serializable {
   }
   
   /**
-   * Return the size of the list at the given index
+   * Return the size of the list at the given index.
+   * If there is no list at this index, the data returned is some arbitrary
+   * integer!
+   * 
    * @param index
-   * @return
+   * @return the size of the list stored at this index 
    */
   public int getListSize(int index) {
    return Utils.twoChars2Int(theList.get(index+2), theList.get(index+3));
@@ -306,14 +336,36 @@ public class StoreArrayOfCharArrays implements Serializable {
   
   //*******************************************************************
   
-  
+  /** 
+   * Utility method to return the next list element after the first element.
+   * Since the first element has a different layout than the other elements,
+   * this method is special. 
+   * @param index
+   * @return 
+   */
   private int getNextElementIndex4First(int index) {
     return Utils.twoChars2Int(theList.get(index+4), theList.get(index+5));
   }
+  /**
+   * Utility method to return the next list element after any but the first element.
+   * @param index
+   * @return 
+   */
   private int getNextElementIndex4Other(int index) {
     return Utils.twoChars2Int(theList.get(index+2), theList.get(index+3));
   }
   
+  /**
+   * Utility method to get data for a variable length chunk in the store without
+   * the number of characters specified at the beginning.
+   * This will get the variable length chunk from the given index, ignore the
+   * length information, then ignore the number of characters given as a 
+   * without, and return the rest of the data as a character array.
+   * 
+   * @param index
+   * @param without
+   * @return 
+   */
   // special method to retrieve just the data from a list element: same as 
   // the ordinary get data, except the we have to skip to chars at the 
   // beginning which is the next element pointer, or the size and next element pointer

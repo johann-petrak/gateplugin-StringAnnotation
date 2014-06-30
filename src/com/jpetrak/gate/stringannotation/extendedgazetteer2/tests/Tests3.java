@@ -11,7 +11,6 @@ import gate.util.GateException;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,8 +46,8 @@ public class Tests3 {
       System.out.println("Plugin home directory is "+pluginHome.getAbsolutePath());
       Gate.getCreoleRegister().registerDirectories(
               pluginHome.toURI().toURL());
-      testingDir = new File(pluginHome,"testbig");
-      assertTrue(testingDir.exists());
+      testingDir = new File(pluginHome,"tests");
+      assertTrue("Directory 'tests' does not exist",testingDir.exists());
     } else {
       System.out.println("Already initialized ...");
     }
@@ -113,7 +112,6 @@ public class Tests3 {
     File defFile = new File(testingDir,"pref_en_500K.def");
     URL gazURL = defFile.toURI().toURL();
     parms.put("configFileURL", gazURL);
-    parms.put("backendNr",3);
     System.gc();
     long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Memory used before loading gazetteer: "+before);

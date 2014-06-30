@@ -1,4 +1,4 @@
-<project name="StringAnnotation" default="jar" basedir=".">
+<project name="StringAnnotationGithub" default="jar" basedir=".">
   <description>
     String Annotation Plugin
   </description>
@@ -88,27 +88,9 @@
 
   <target name="dist" depends="jar,javadoc" />
  
-  <target name="tests" depends="jar,test1-1,test2-1,test3-1"/>
+  <target name="tests" depends="jar,test1,test2,test3"/>
 
-  <target name="test1-1" depends="jar">
-    <junit fork="true" showoutput="yes" printsummary="yes">
-      <classpath>
-        <pathelement location="${jar.location}" />
-        <path refid="compile.classpath" />
-      </classpath>
-      <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="xml" />
-      <test name="at.ofai.gate.extendedgazetteer.tests.Tests1" />
-    </junit>
-    <junitreport>
-      <fileset dir=".">
-        <include name="TEST-*.xml" />
-      </fileset>
-      <report todir="." format="noframes" />
-    </junitreport>
-  </target>
-
-  <target name="test2-1" depends="jar">
+  <target name="test1" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes">
       <classpath>
         <pathelement location="${jar.location}" />
@@ -126,7 +108,7 @@
     </junitreport>
   </target>
 
-  <target name="test2-2" depends="jar">
+  <target name="test2" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes" maxmemory="2500M">
       <classpath>
         <pathelement location="${jar.location}" />
@@ -144,7 +126,7 @@
     </junitreport>
   </target>
 
-  <target name="test2-3" depends="jar">
+  <target name="test3" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes" maxmemory="2500M">
       <classpath>
         <pathelement location="${jar.location}" />
@@ -163,25 +145,6 @@
   </target>
 
 
-  <target name="test3-1" depends="jar">
-    <junit fork="true" showoutput="yes" printsummary="yes">
-      <classpath>
-        <pathelement location="${jar.location}" />
-        <path refid="compile.classpath" />
-      </classpath>
-      <sysproperty key="java.awt.headless" value="true" />
-      <formatter type="xml" />
-      <test name="com.jpetrak.gate.stringannotation.extendedgazetteer3.tests.Tests1" />
-    </junit>
-    <junitreport>
-      <fileset dir=".">
-        <include name="TEST-*.xml" />
-      </fileset>
-      <report todir="." format="noframes" />
-    </junitreport>
-  </target>
-
- 
   <!-- Targets used by the main GATE build file 
        Only needed if this plugin gets included in the GATE plugins set
   -->
