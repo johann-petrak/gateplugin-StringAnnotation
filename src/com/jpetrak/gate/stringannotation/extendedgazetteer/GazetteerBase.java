@@ -88,22 +88,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser {
   }
   private String caseConversionLanguage;
 
-  // the feature separator string should probably move fully into the config file
-  // once we move fully to yaml. As long as we use/support the def format too, we still
-  // need it here though to provide at least the default.
-  @CreoleParameter(
-          comment = "The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, this gazetteer does not support extra features.",
-          defaultValue = "\\t")
-  @Optional
-  public void setGazetteerFeatureSeparator(String sep) {
-    gazetteerFeatureSeparator = sep;
-  }
-
-  public String getGazetteerFeatureSeparator() {
-    return gazetteerFeatureSeparator;
-  }
-  protected String gazetteerFeatureSeparator;
-  protected String unescapedSeparator = null;
+  protected static final String unescapedSeparator = Strings.unescape("\\t");
   protected Locale caseConversionLocale = Locale.ENGLISH;
   protected Logger logger;
   //protected CharMapState initialState;
@@ -369,14 +354,6 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser {
   void loadListFile(String listFileName, String majorType, String minorType,
           String languages, String annotationType)
           throws MalformedURLException, IOException {
-
-    // TODO: the separator character should become a parameter that 
-    // can be set per list file!
-    // This is still the global one, but it should be a per-list file
-    // one wit a global default
-    if (gazetteerFeatureSeparator != null && !gazetteerFeatureSeparator.isEmpty()) {
-      unescapedSeparator = Strings.unescape(gazetteerFeatureSeparator);
-    }
 
     //logger.info("Loading list file "+listFileName);
     URL lurl = new URL(configFileURL, listFileName);
