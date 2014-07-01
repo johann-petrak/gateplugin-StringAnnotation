@@ -6,13 +6,17 @@
  */
 package com.jpetrak.gate.stringannotation.regexp;
 
+import com.jpetrak.gate.stringannotation.utils.TextChunk;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 
 import gate.*;
 import gate.creole.*;
-import gate.creole.metadata.*;
+import gate.creole.metadata.CreoleParameter;
+import gate.creole.metadata.CreoleResource;
+import gate.creole.metadata.Optional;
+import gate.creole.metadata.RunTime;
 import gate.util.*;
 import java.io.BufferedReader;
 import java.net.URL;
@@ -23,11 +27,6 @@ import org.apache.commons.lang3.text.*;
 // TODO:
 // = use TextChunk 
 // = runtime parameter containingAnnotationType
-// = matchAtWordEndOnly/matchAtWordStartOnly ??? This will require spaceAnnotationType and 
-//   wordAnnotationType. We need wordAnnotationType anyway, so why not? If both are
-//   false, we simply do not require the annotations and use the text
-//   => should do this for extendedgazetteer too?
-// = add splitAnnotationType
 // = and wordAnnotationType/textFeature for indirect annotation
 
 /** 
@@ -57,14 +56,85 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
      defaultValue = "")
   // @Optional
   @RunTime
-  public void setOutputASName(String name) {
-    outputASName = name;
+  public void setOutputAnnotationSet(String name) {
+    outputAnnotationSet = name;
   }
-  public String getOutputASName() {
-    return outputASName;
+  public String getOutputAnnotationSet() {
+    return outputAnnotationSet;
   } 
-  protected String outputASName = "";
+  protected String outputAnnotationSet = "";
  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The containing annotation set type",
+  defaultValue = "")
+  public void setContainingAnnotationType(String val) {
+    this.containingAnnotationType = val;
+  }
+  public String getContainingAnnotationType() {
+    return containingAnnotationType;
+  }
+  private String containingAnnotationType = "";
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The input annotation set, for the containing and the input annotation types",
+  defaultValue = "")
+  public void setInputAnnotationSet(String ias) {
+    this.inputAnnotationSet = ias;
+  }
+  public String getInputAnnotationSet() {
+    return inputAnnotationSet;
+  }
+  private String inputAnnotationSet = "";
+  
+  
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The input annotation type, if indirect annotation is wanted, if empty: no indirect annotation",
+  defaultValue = "")
+  public void setInputAnnotationType(String val) {
+    this.inputAnnotationType = val;
+  }
+  public String getInputAnnotationType() {
+    return inputAnnotationType;
+  }
+  private String inputAnnotationType = "";
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The space annotation set type, if indirect annotation is wanted, otherwise ignored",
+  defaultValue = "SpaceToken")
+  public void setSpaceAnnotationType(String val) {
+    this.spaceAnnotationType = val;
+  }
+  public String getSpaceAnnotationType() {
+    return spaceAnnotationType;
+  }
+  private String spaceAnnotationType = "";
+  
+  @RunTime
+  @Optional
+  @CreoleParameter(
+    comment = "The feature from the input annotation to use as text for indirect annotation - if empty, use the document text",
+  defaultValue = "")
+  public void setTextFeature(String val) {
+    this.textFeature = val;
+  }
+  public String getTextFeature() {
+    return textFeature;
+  }
+  private String textFeature = "";
+  
+  
+
+  
+  
   @CreoleParameter(comment = "Should overlapping matches be allowed?", defaultValue = "false")
   @RunTime
   public void setOverlappingMatches(Boolean flag) {
@@ -131,12 +201,69 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
     int lastProgress = 0;
     fireProgressChanged(lastProgress);
     //get pointers to the annotation sets
-    AnnotationSet outputAS = (outputASName == null
-      || outputASName.trim().length() == 0)
+    AnnotationSet outputAS = (outputAnnotationSet == null
+      || outputAnnotationSet.trim().length() == 0)
       ? theDocument.getAnnotations()
-      : theDocument.getAnnotations(outputASName);
+      : theDocument.getAnnotations(outputAnnotationSet);
 
-    String docText = theDocument.getContent().toString();
+    AnnotationSet inputAS = null; 
+    if(inputAnnotationSet == null ||
+       inputAnnotationSet.equals("")) inputAS = theDocument.getAnnotations();
+    else inputAS = theDocument.getAnnotations(inputAnnotationSet);    
+    
+    AnnotationSet containingAnns = null;
+    if(containingAnnotationType == null || containingAnnotationType.isEmpty()) {
+      // leave the containingAnns null to indicate we do not use containing annotations
+    } else {
+      containingAnns = inputAS.get(containingAnnotationType);
+      //System.out.println("DEBUG: got containing annots: "+containingAnns.size()+" type is "+containingAnnotationType);
+    }
+    
+    // check if an input annotation type is specified. If yes, we want indirect
+    // annotation
+    boolean indirect = false;
+    AnnotationSet processAnns = null;
+    if(getInputAnnotationType() != null && !getInputAnnotationType().isEmpty()) {
+      indirect = true;
+      Set<String> typeSet = new HashSet<String>();
+      typeSet.add(getInputAnnotationType());
+      typeSet.add(getSpaceAnnotationType());
+      processAnns = inputAS.get(typeSet);
+    }
+    
+    // now create the chunks to annotate: if we have a containing annotation, 
+    // one chunk for each containing annotation, otherwise just one chunk for
+    // the whole document
+    TextChunk chunk = null;
+    if(containingAnns == null) {
+      if(indirect) {
+        chunk = TextChunk.makeChunk(document, 0, document.getContent().size(),false,
+                processAnns, getInputAnnotationType(), getTextFeature(), getSpaceAnnotationType(), 
+                false, false, null, null, null);
+        //System.out.println("Created chunk notContaining/indirect: "+chunk);
+      } else {
+        chunk = TextChunk.makeChunk(document, 0, document.getContent().size());
+        //System.out.println("Created chunk notContaining/direct: "+chunk);
+      }
+      annotateChunk(chunk,outputAS);
+    } else {
+      for(Annotation containing : containingAnns) {
+        if(indirect) {
+          chunk = TextChunk.makeChunk(document, containing, false,
+                  processAnns, getInputAnnotationType(), getTextFeature(), getSpaceAnnotationType(), 
+                  false, false, null, null, null);          
+          //System.out.println("Created chunk containing/indirect: "+chunk);
+        } else {
+          chunk = TextChunk.makeChunk(document,Utils.start(containing),Utils.end(containing));
+          //System.out.println("Created chunk containing/direct: "+chunk);
+        }
+        annotateChunk(chunk,outputAS);
+      }
+    }
+  }
+   
+  protected void annotateChunk(TextChunk chunk, AnnotationSet outputAS) {
+    String docText = chunk.getTextString();
 
     boolean haveActive = false;
     
@@ -223,26 +350,26 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
           if(debugMessages) {
             System.out.println("Annotating for ALL: "+rule);
           }
-          annotateMatch(rule, outputAS);
+          annotateMatch(rule, outputAS,chunk);
         }
       } else {
         if(candidates.size() == 1) {
           if(debugMessages) {
             System.out.println("Annotating size 1 "+candidates.get(0));
           }
-          annotateMatch(candidates.get(0), outputAS);
+          annotateMatch(candidates.get(0), outputAS,chunk);
           longestLength = candidates.get(0).matcher_length;
         } else if(matchPreference == MatchPreference.FIRSTRULE) {
           if(debugMessages) {
             System.out.println("Annotating FIRSTRULE "+candidates.get(0));
           }
-          annotateMatch(candidates.get(0),outputAS);
+          annotateMatch(candidates.get(0),outputAS,chunk);
           longestLength = candidates.get(0).matcher_length; 
         } else if(matchPreference == MatchPreference.LASTRULE) {
           if(debugMessages) {
             System.out.println("Annotating LASTRULE "+candidates.get(candidates.size()-1));
           }
-          annotateMatch(candidates.get(candidates.size()-1),outputAS);
+          annotateMatch(candidates.get(candidates.size()-1),outputAS,chunk);
           longestLength = candidates.get(candidates.size()-1).matcher_length;
         } else {
           // filter to only take the longest matches
@@ -253,7 +380,7 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
                 if(debugMessages) {
                   System.out.println("Annotating LONGEST_ALLRULES "+rule);
                 }
-                annotateMatch(rule, outputAS);
+                annotateMatch(rule, outputAS,chunk);
               } else {
                 longestRules.add(rule);
               }
@@ -263,12 +390,12 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
             if(debugMessages) {
               System.out.println("Annotating LONGEST_FIRSTRULE "+longestRules.get(0));
             }
-            annotateMatch(longestRules.get(0), outputAS);
+            annotateMatch(longestRules.get(0), outputAS,chunk);
           } else if(matchPreference == MatchPreference.LONGEST_LASTRULE) {
             if(debugMessages) {
               System.out.println("Annotating LONGEST_LASTRULE "+longestRules.get(longestRules.size()-1));
             }
-            annotateMatch(longestRules.get(longestRules.size()-1),outputAS);
+            annotateMatch(longestRules.get(longestRules.size()-1),outputAS,chunk);
           }
         }
       }      
@@ -285,7 +412,7 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
     fireProcessFinished();
   }
 
-  protected void annotateMatch(PatternRule rule, AnnotationSet outputAS) {
+  protected void annotateMatch(PatternRule rule, AnnotationSet outputAS, TextChunk chunk) {
     List<AnnDesc> anndescs = rule.annDescs;
     Matcher matcher = rule.matcher;
     //System.out.println("annotateMatch for "+rule);
@@ -331,14 +458,18 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
             fm.put("sra_debug_anndesc",anndesc.anndescnumber);
             fm.put("sra_debug_group",groupnr);
           }
+          int fromOff = chunk.getStartOffset(from);
+          // TODO: why is this (.-1)+1 necessary here but things work with the 
+          // indirect extended gazetteer?
+          int toOff = chunk.getEndOffset(to-1)+1;
           try {
             if(debugMessages) {
               System.out.println("Adding annotation "+anntype+" anndesc="+anndesc+" groupnr="+groupnr);
             }
-            outputAS.add(new Long(from), new Long(to), anntype, fm);
+            outputAS.add(new Long(fromOff), new Long(toOff), anntype, fm);
           } catch (InvalidOffsetException ex) {
             throw new GateRuntimeException(
-              "Invalid offset exception for from=" + from + ",to=" + to + 
+              "Invalid offset exception for from=" + fromOff + ", fromInChunk="+from+", to=" + toOff + ", toInChunk="+to + 
               ",doclen="+document.getContent().size(),ex);
           }
         }

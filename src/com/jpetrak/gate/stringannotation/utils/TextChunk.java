@@ -166,6 +166,32 @@ public class TextChunk {
   }
   
   public static TextChunk makeChunk(
+          Document document,
+          long fromOffset, long toOffset          
+          ) {
+    TextChunk chunk = new TextChunk();
+    String docText = document.getContent().toString();
+    if((toOffset - fromOffset)<0) {
+      throw new GateRuntimeException("Cannot annotate range of negative length");
+    }
+    int length = (int)(toOffset - fromOffset);
+    chunk.initialLength = length;
+    chunk.from = (int)fromOffset;
+    chunk.to = (int)toOffset;
+    chunk.text = docText.substring(chunk.from, chunk.to).toCharArray();
+    chunk.endOffsets = new int[chunk.initialLength];
+    chunk.startOffsets = new int[chunk.initialLength];
+    for(int i = 0; i < chunk.to; i++) {
+      chunk.putStartOffset(i, chunk.from+i);
+      chunk.putEndOffset(i, chunk.from+i);
+      chunk.setIsValidMatchEnd(i);
+      chunk.setIsValidMatchStart(i);
+    }
+    return chunk;
+  }
+  
+  
+  public static TextChunk makeChunk(
       Document document, 
       long fromOffset, long toOffset,
       boolean caseNormalize,
