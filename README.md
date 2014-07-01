@@ -1,6 +1,10 @@
 gateplugin-stringannotation
 ===========================
 
-A plugin for the GATE language technology framework that provides gazetteer and regular expression annotator PRs for string annotation
+A plugin for the <a href="https://gate.ac.uk">GATE language technology</a> framework that provides PRs for string annotation.
 
-THIS IS WORK IN PROGRESS, NOTHING USEFUL TO SEE HERE FOR NOW, PLEASE MOVE ON!
+This is an updated and modified version (not backwards compatible any more) of what can be found here: https://code.google.com/p/gateplugin-stringannotation/ 
+
+For more information please consult the Wiki: https://github.com/johann-petrak/gateplugin-stringannotation/wiki
+
+To download see: https://github.com/johann-petrak/gateplugin-stringannotation/releases
