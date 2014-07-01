@@ -196,8 +196,7 @@ public class TextChunk {
       long fromOffset, long toOffset,
       boolean caseNormalize,
       AnnotationSet processAnns, String wordAnnotationType, String wordAnnotationFeature, String spaceAnnotationType,
-      boolean startWithWordStart, boolean endWithWordEnd, 
-      String matchStartFeature, String matchEndFeature, String matchTypeFeature) {
+      boolean startWithWordStart, boolean endWithWordEnd) {
     
     // TODO: at the moment we do not do language specific case normalization here because this would
     // make it more complex to keep track of the indices -- String.toUpper(locale) can change the size of the string!
@@ -246,26 +245,6 @@ public class TextChunk {
         
         String wordText = null;
         
-        // if a matchTypeFeature is specified:
-        if(matchTypeFeature != null && !matchTypeFeature.isEmpty()) {
-          Object val = actualAnn.getFeatures().get(matchTypeFeature);
-          if(val != null) {
-            String valstr = val.toString();
-            if(valstr.equals("n") || valstr.isEmpty()) {
-              // this means just normal processing, do nothing special
-            } else if(valstr.equals("i")) {
-              // ignore the word as if it was not here at all
-              continue;
-            } else if(valstr.equals("f")) {
-              // fail: never match this word!
-              // we achieve this by a little trick: we just set the first character
-              // of the word to char=0 -- since 0 can never occur in a gazetteer entry,
-              // all matches will fail at the first character of the word
-              wordText = new String(new char[] { 0 });
-            }
-          }
-        }
-
         // unless we havent set the text already to 0 earlier
         if (wordText == null) {
           if (haveFeature) {
@@ -293,30 +272,7 @@ public class TextChunk {
         // Same for wordEndFeature
         boolean validMatchEndDefault = true;
         boolean validMatchStartDefault = true;
-        
-        if(matchEndFeature != null && !matchEndFeature.isEmpty()) {
-          Object val = actualAnn.getFeatures().get(matchEndFeature);
-          if(val != null) {
-            String valstr = val.toString();
-            if(valstr.isEmpty() || valstr.equals("false") || valstr.equals("0")) {
-              validMatchEndDefault = false;
-            }
-          } else {
-            validMatchEndDefault = false;
-          }          
-        }
-        if(matchStartFeature != null && !matchStartFeature.isEmpty()) {
-          Object val = actualAnn.getFeatures().get(matchStartFeature);
-          if(val != null) {
-            String valstr = val.toString();
-            if(valstr.isEmpty() || valstr.equals("false") || valstr.equals("0")) {
-              validMatchStartDefault = false;
-            }
-          } else {
-            validMatchStartDefault = false;
-          }
-        }
-        
+                
         firstSpace = true; 
         // add the wordText
         char[] wordTextChars = wordText.toCharArray();
@@ -375,11 +331,10 @@ public class TextChunk {
   }
   public static TextChunk makeChunk(Document document, Annotation ann, boolean caseNormalise,
       AnnotationSet processAnns, String wordAnnotationType, String wordAnnotationFeature, String spaceAnnotationType,
-      boolean startWithWordStart, boolean endWithWordEnd, String wordStartFeature, String wordEndFeature,
-      String wordFeature) {
+      boolean startWithWordStart, boolean endWithWordEnd) {
     return makeChunk(document, ann.getStartNode().getOffset(),ann.getEndNode().getOffset(),caseNormalise, processAnns, 
         wordAnnotationType,wordAnnotationFeature,spaceAnnotationType,
-        startWithWordStart, endWithWordEnd, wordStartFeature, wordEndFeature, wordFeature);
+        startWithWordStart, endWithWordEnd);
   }
  
   public int getLength() {

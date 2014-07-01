@@ -36,6 +36,7 @@ import org.apache.commons.lang3.text.*;
  */
 @CreoleResource(name = "Java Regexp Annotator",
 helpURL="http://code.google.com/p/gateplugin-stringannotation/wiki/SimpleRegexpAnnotator",
+icon="shefGazetteer.gif",
 comment = "Create annotations based on Java regular expressions")
 public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
   implements ProcessingResource {
@@ -239,7 +240,7 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
       if(indirect) {
         chunk = TextChunk.makeChunk(document, 0, document.getContent().size(),false,
                 processAnns, getInputAnnotationType(), getTextFeature(), getSpaceAnnotationType(), 
-                false, false, null, null, null);
+                false, false);
         //System.out.println("Created chunk notContaining/indirect: "+chunk);
       } else {
         chunk = TextChunk.makeChunk(document, 0, document.getContent().size());
@@ -251,7 +252,7 @@ public class JavaRegexpAnnotator extends AbstractLanguageAnalyser
         if(indirect) {
           chunk = TextChunk.makeChunk(document, containing, false,
                   processAnns, getInputAnnotationType(), getTextFeature(), getSpaceAnnotationType(), 
-                  false, false, null, null, null);          
+                  false, false);          
           //System.out.println("Created chunk containing/indirect: "+chunk);
         } else {
           chunk = TextChunk.makeChunk(document,Utils.start(containing),Utils.end(containing));

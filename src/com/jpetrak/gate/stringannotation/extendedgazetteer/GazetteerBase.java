@@ -15,7 +15,6 @@ import gate.creole.ANNIEConstants;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
-import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;

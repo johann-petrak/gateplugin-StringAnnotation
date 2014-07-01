@@ -19,7 +19,6 @@ import gate.creole.ExecutionException;
 import gate.creole.ExecutionInterruptedException;
 import gate.creole.metadata.CreoleParameter;
 import gate.creole.metadata.CreoleResource;
-import gate.creole.metadata.HiddenCreoleParameter;
 import gate.creole.metadata.Optional;
 import gate.creole.metadata.RunTime;
 import gate.util.GateRuntimeException;
@@ -41,7 +40,7 @@ import org.apache.log4j.Logger;
  *  @author Johann Petrak
  */
 @CreoleResource(
-  name = "Extended Gazetteer 2",
+  name = "Extended Gazetteer",
   comment = "Fast, low-memory footprint gazetteer with many additional features",
   icon="shefGazetteer.gif",
   helpURL="TODO"
@@ -195,16 +194,6 @@ public class ExtendedGazetteer extends GazetteerBase
     }
     private boolean matchAtWordEndOnly;
     
-  @CreoleParameter(comment = "Annotate prefixes and suffixes",defaultValue="false")
-  @RunTime
-  @Optional
-  @HiddenCreoleParameter    // for now hidden since it is not implemented yet!!
-  public void setAnnotatePrefixesSuffixes(Boolean yesno) { 
-    annotatePrefixesSuffixes = yesno;
-  }
-  public Boolean getAnnotatePrefixesSuffixes() { return annotatePrefixesSuffixes ; }
-  private Boolean annotatePrefixesSuffixes = false;
-  
   @CreoleParameter(comment = "Should this gazetteer only match the longest possible match at each offset?",
     defaultValue = "true")
   @RunTime
@@ -216,41 +205,6 @@ public class ExtendedGazetteer extends GazetteerBase
   }
   private boolean longestMatchOnly;
     
-  
-  @RunTime
-  @Optional
-  @CreoleParameter(comment="A feature which indicates, if not-missing, not-empty, not-zero, not-false, a valid match start word")
-  public void setMatchStartFeature(String val) {
-    matchStartFeature = val;
-  }
-  public String getMatchStartFeature() {
-    return matchStartFeature;
-  }
-  protected String matchStartFeature;
-    
-  @RunTime
-  @Optional
-  @CreoleParameter(comment="A feature which indicates, if non-missing, non-empty, non-zero, non-false, a valid match end word")
-  public void setMatchEndFeature(String val) {
-    matchEndFeature = val;
-  }
-  public String getMatchEndFeature() {
-    return matchEndFeature;
-  }
-  protected String matchEndFeature;
-    
-  // If this feature is specified, then the value is checked and the word is only used for
-  // matching if it indicates a non-false value.
-  @RunTime
-  @Optional
-  @CreoleParameter(comment="A feature which indicates, if present and 'i': ignore, 'f': fail/never match, 'n': normal match")
-  public void setMatchTypeFeature(String val) {
-    matchTypeFeature = val;
-  }
-  public String getMatchTypeFeature() {
-    return matchTypeFeature;
-  }
-  protected String matchTypeFeature;
   
   // ************************************************************************
   // other class fields 
@@ -341,7 +295,7 @@ public class ExtendedGazetteer extends GazetteerBase
             doAnnotateChunk(TextChunk.makeChunk(
                 document,lastOffset,splitOffset,!caseSensitive,
                 processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-                matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+                matchAtWordStartOnly,matchAtWordEndOnly));
           }
           lastOffset = splitOffset;
         } // for
@@ -349,13 +303,13 @@ public class ExtendedGazetteer extends GazetteerBase
         if(lastOffset < endOffset) {
           doAnnotateChunk(TextChunk.makeChunk(document,lastOffset,endOffset,!caseSensitive,
               processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-              matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+              matchAtWordStartOnly,matchAtWordEndOnly));
         }
       } else {
         // create a chunk from the whole document
         doAnnotateChunk(TextChunk.makeChunk(document,0,endOffset,!caseSensitive,
             processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-            matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+            matchAtWordStartOnly,matchAtWordEndOnly));
       }
     } else {
       for(Annotation containingAnn : containingAnns) {
@@ -377,7 +331,7 @@ public class ExtendedGazetteer extends GazetteerBase
                 doAnnotateChunk(TextChunk.makeChunk(
                     document,lastOffset,splitOffset,!caseSensitive,
                     processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-                    matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+                    matchAtWordStartOnly,matchAtWordEndOnly));
               }
               lastOffset = splitOffset;
             } // for
@@ -386,7 +340,7 @@ public class ExtendedGazetteer extends GazetteerBase
              doAnnotateChunk(TextChunk.makeChunk(
                  document,lastOffset,endOffset,!caseSensitive,
                  processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-                 matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+                 matchAtWordStartOnly,matchAtWordEndOnly));
             }
             
             
@@ -396,13 +350,13 @@ public class ExtendedGazetteer extends GazetteerBase
             doAnnotateChunk(TextChunk.makeChunk(
                 document,containingAnn,!caseSensitive,
                 processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-                matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+                matchAtWordStartOnly,matchAtWordEndOnly));
           }
         } else {
           // no splits, just annotate the chunk for this containing annotation
           doAnnotateChunk(TextChunk.makeChunk(document,containingAnn,!caseSensitive,
               processAnns,wordAnnotationType,textFeature,spaceAnnotationType,
-              matchAtWordStartOnly,matchAtWordEndOnly,matchStartFeature,matchEndFeature,matchTypeFeature));
+              matchAtWordStartOnly,matchAtWordEndOnly));
         }
       }
     }

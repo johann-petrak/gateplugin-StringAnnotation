@@ -88,8 +88,8 @@
 
   <target name="dist" depends="jar,javadoc" />
  
-  <!--  <target name="tests" depends="jar,test1,test2,test3,testJRA1"/> -->
-  <target name="tests" depends="jar,testJRA1"/>
+  <target name="tests" depends="jar,test1,test2,test3,testJRA1"/> 
+  <!-- <target name="tests" depends="jar,testJRA1"/> -->
 
   <target name="test1" depends="jar">
     <junit fork="true" showoutput="yes" printsummary="yes">
