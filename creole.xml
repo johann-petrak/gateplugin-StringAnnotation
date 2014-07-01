@@ -7,7 +7,6 @@
 >
   <JAR scan="true">StringAnnotation.jar</JAR>
   <JAR>lib/commons-cli-1.2.jar</JAR>
-  <JAR>lib/VirtualDocuments.jar</JAR>
   <JAR>lib/fastutil-6.5.4.jar</JAR>
   <JAR>lib/commons-io-2.4.jar</JAR>
   <JAR>lib/snakeyaml-1.11.jar</JAR>
