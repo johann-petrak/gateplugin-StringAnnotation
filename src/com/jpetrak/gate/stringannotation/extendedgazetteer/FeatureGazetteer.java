@@ -32,7 +32,7 @@ import org.apache.log4j.Logger;
 
 
 /**
- * 
+ * See document in the wiki: https://github.com/johann-petrak/gateplugin-stringannotation/wiki/Feature-Gazetteer
  *
  *  @author Johann Petrak
  */
@@ -40,7 +40,7 @@ import org.apache.log4j.Logger;
   name = "Feature Gazetteer",
   comment = "Run the gazetteer on individual feature values and add features, delete or annotate",
   icon="shefGazetteer.gif",
-  helpURL="http://code.google.com/p/gateplugin-stringannotation/wiki/FeatureGazetteer"
+  helpURL="https://github.com/johann-petrak/gateplugin-stringannotation/wiki/Feature-Gazetteer"
 )
 @SuppressWarnings("javadoc")
 public class FeatureGazetteer extends GazetteerBase

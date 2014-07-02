@@ -35,7 +35,7 @@ import org.apache.log4j.Logger;
 
 /**
  * See documentation in the wiki:
- * TODO
+ * https://github.com/johann-petrak/gateplugin-stringannotation/wiki/Extended-Gazetteer
  *
  *  @author Johann Petrak
  */
@@ -43,7 +43,7 @@ import org.apache.log4j.Logger;
   name = "Extended Gazetteer",
   comment = "Fast, low-memory footprint gazetteer with many additional features",
   icon="shefGazetteer.gif",
-  helpURL="TODO"
+  helpURL="https://github.com/johann-petrak/gateplugin-stringannotation/wiki/Extended-Gazetteer"
 )
 @SuppressWarnings("javadoc")
 public class ExtendedGazetteer extends GazetteerBase

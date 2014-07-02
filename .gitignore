@@ -14,3 +14,5 @@ StringAnnotation-*.zip
 TEST-*.xml
 TESTS-TestSuites.xml
 junit-noframes.html
+
+hs_err_*.log
