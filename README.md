@@ -8,3 +8,5 @@ This is an updated and modified version (not backwards compatible any more) of w
 For more information please consult the Wiki: https://github.com/johann-petrak/gateplugin-stringannotation/wiki
 
 To download see: https://github.com/johann-petrak/gateplugin-stringannotation/releases
+
+Feedback: please report bugs or feature request to the issue tracker: https://github.com/johann-petrak/gateplugin-stringannotation/issues
