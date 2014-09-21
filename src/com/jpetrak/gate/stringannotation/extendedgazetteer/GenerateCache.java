@@ -85,11 +85,11 @@ public class GenerateCache {
       parms.put("configFileURL", url);
       parms.put("caseSensitive", caseSensitive);
       parms.put("caseConversionLanguage", locale);
-      parms.put("gazetteerFeatureSeparator","\\t");
+      // parms.put("gazetteerFeatureSeparator","\\t");
       try {
         gate.ProcessingResource pr = 
           (gate.ProcessingResource) Factory.createResource(
-                "com.jpetrak.gate.stringannotation.extendedgazetteer2.ExtendedGazetteer2",
+                "com.jpetrak.gate.stringannotation.extendedgazetteer.ExtendedGazetteer",
                 parms);
       } catch (Exception ex) {
         System.err.println("Error initializing the gazetteer PR");
