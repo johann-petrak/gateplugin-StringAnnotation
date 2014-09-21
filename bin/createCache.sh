@@ -23,5 +23,5 @@ ROOTDIR=`cd "$SCRIPTDIR/.."; pwd -P`
 
 pluginDir="$ROOTDIR"
 
-java -cp "$ROOTDIR"/'lib/*':"$ROOTDIR"/StringAnnotation.jar:"${GATE_HOME}/bin/gate.jar":"${GATE_HOME}/"'lib/*' -DpluginDir="$pluginDir" -Dgate.home="$GATE_HOME" com.jpetrak.gate.stringannotation.extendedgazetteer2.GenerateCache "$@"
+java -cp "$ROOTDIR"/'lib/*':"$ROOTDIR"/StringAnnotation.jar:"${GATE_HOME}/bin/gate.jar":"${GATE_HOME}/"'lib/*' -DpluginDir="$pluginDir" -Dgate.home="$GATE_HOME" com.jpetrak.gate.stringannotation.extendedgazetteer.GenerateCache "$@"
 
