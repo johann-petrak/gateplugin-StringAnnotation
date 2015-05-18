@@ -15,7 +15,6 @@ import gate.creole.ANNIEConstants;
 import gate.creole.AbstractLanguageAnalyser;
 import gate.creole.ResourceInstantiationException;
 import gate.creole.metadata.CreoleParameter;
-import gate.creole.metadata.Optional;
 import gate.util.BomStrippingInputStreamReader;
 import gate.util.GateRuntimeException;
 import gate.util.Strings;
@@ -38,21 +37,15 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.GazStoreTrie3;
-import gate.CreoleRegister;
-import gate.Gate;
 import gate.GateConstants;
-import gate.creole.ResourceData;
+import gate.creole.metadata.Optional;
 import gate.gui.ActionsPublisher;
-import gate.gui.MainFrame;
-import gate.gui.NewResourceDialog;
 import java.awt.event.ActionEvent;
 import java.io.InputStreamReader;
-import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import static javax.swing.Action.SHORT_DESCRIPTION;
-import javax.swing.JOptionPane;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -101,7 +94,26 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   }
   private String caseConversionLanguage;
 
-  protected static final String unescapedSeparator = Strings.unescape("\\t");
+  @CreoleParameter(
+      comment = "The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, a tab character will be used",
+      defaultValue = "\\t"
+      )
+  @Optional
+  public void setGazetteerFeatureSeparator(String sep) {
+    gazetteerFeatureSeparator = sep;
+    if(sep == null || !sep.isEmpty()) {
+      unescapedSeparator = Strings.unescape("\\t");
+    } else {
+      unescapedSeparator = Strings.unescape(sep);
+    }
+  }
+  public String getGazetteerFeatureSeparator() {
+    return gazetteerFeatureSeparator;
+  }  
+  
+  
+  protected String gazetteerFeatureSeparator = "\\t";
+  protected String unescapedSeparator = Strings.unescape("\\t");
   protected Locale caseConversionLocale = Locale.ENGLISH;
   protected Logger logger;
   //protected CharMapState initialState;
