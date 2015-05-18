@@ -38,8 +38,21 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.GazStoreTrie3;
+import gate.CreoleRegister;
+import gate.Gate;
+import gate.GateConstants;
+import gate.creole.ResourceData;
+import gate.gui.ActionsPublisher;
+import gate.gui.MainFrame;
+import gate.gui.NewResourceDialog;
+import java.awt.event.ActionEvent;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import static javax.swing.Action.SHORT_DESCRIPTION;
+import javax.swing.JOptionPane;
 
 import org.yaml.snakeyaml.Yaml;
 
@@ -50,7 +63,7 @@ import org.yaml.snakeyaml.Yaml;
  *
  * @author Johann Petrak
  */
-public abstract class GazetteerBase extends AbstractLanguageAnalyser {
+public abstract class GazetteerBase extends AbstractLanguageAnalyser implements ActionsPublisher {
 
   /**
    *
@@ -174,6 +187,32 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser {
     logger.info(gazStore.statsString());
   }
 
+  private synchronized void replaceGazStore() throws ResourceInstantiationException {
+    String uniqueGazStoreKey = genUniqueGazStoreKey();
+    logger.info("Replacing gazetteer for " + getConfigFileURL());
+    System.gc();
+    long startTime = System.currentTimeMillis();
+    long before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+    GazStore gs = loadedGazStores.get(uniqueGazStoreKey);
+    try {
+      loadData();
+      gazStore.compact();
+    } catch (Exception ex) {
+      throw new ResourceInstantiationException("Could not load gazetteer", ex);
+    }
+    loadedGazStores.put(uniqueGazStoreKey, gazStore);
+    logger.info("GazStore replaced for " + uniqueGazStoreKey);
+
+    long endTime = System.currentTimeMillis();
+    System.gc();
+    long after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+    logger.info("Gazetteer created in (secs):          " + ((endTime - startTime) / 1000.0));
+    logger.info("Heap memory increase (estimate,MB):   "
+            + String.format("%01.3f", ((after - before) / (1024.0 * 1024.0))));
+    logger.info(gazStore.statsString());
+  }
+  
+  
   private synchronized void decrementGazStore() {
     String key = genUniqueGazStoreKey();
     GazStore gs = loadedGazStores.get(key);
@@ -206,11 +245,10 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser {
   @Override
   /**
    */
-  // TODO: we may want to delete the cache and re-init from the list files when
-  // reInit() is called?
   public void reInit() throws ResourceInstantiationException {
-    removeGazStore();
-    init();
+    //removeGazStore();
+    //init();
+    replaceGazStore();
   }
 
   protected void loadData() throws UnsupportedEncodingException, IOException, ResourceInstantiationException {
@@ -517,6 +555,47 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser {
       fms.add(fm);
     }
     return fms;
+  }
+
+  private List<Action> actions;
+  
+  @Override
+  public List<Action> getActions() {
+    if (actions == null) {
+      actions = new ArrayList<Action>();
+
+      // Action 1: remove the gazbin file and re-initialize the gazetteer
+      actions.add(
+              new AbstractAction("Remove cache and re-initialize") {
+        {
+          putValue(SHORT_DESCRIPTION,
+                  "Remove cache and re-initialize");
+          putValue(GateConstants.MENU_PATH_KEY,
+                  new String[]{"WTFISTHIS??????"});
+        }
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public void actionPerformed(ActionEvent evt) {
+          File configFile = gate.util.Files.fileFromURL(getConfigFileURL());
+          String configFileName = configFile.getAbsolutePath();
+          String gazbinFileName = configFileName.replaceAll("(?:\\.def$|\\.defyaml)", ".gazbin");
+          if (configFileName.equals(gazbinFileName)) {
+            throw new GateRuntimeException("Config file must have def or defyaml extension!");
+          }
+          File gazbinFile = new File(gazbinFileName);
+          gazbinFile.delete();
+          try {
+            reInit();
+          } catch (ResourceInstantiationException ex) {
+            throw new GateRuntimeException("Re-initialization failed",ex);
+          }
+        }
+      });
+
+      
+    }
+    return actions;
   }
 } // ExtendedGazetteer
 
