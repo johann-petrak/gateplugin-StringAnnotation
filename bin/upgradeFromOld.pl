@@ -12,6 +12,8 @@ foreach my $f ( @ARGV ) {
 foreach my $f ( @ARGV ) {
   my $s = getContent($f);
   $s =~ s/extendedgazetteer2\.ExtendedGazetteer2/extendedgazetteer.ExtendedGazetteer/g;
+  $s =~ s/extendedgazetteer2\.FeatureGazetteer/extendedgazetteer.FeatureGazetteer/g;
+  $s =~ s/extendedgazetteer2\.FeatureGazetteerProcessingMode/extendedgazetteer.ExtendedGazetteerProcessingMode/g;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchStartFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchEndFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchTypeFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
