@@ -15,8 +15,11 @@ foreach my $f ( @ARGV ) {
   $s =~ s/extendedgazetteer2\.FeatureGazetteer/extendedgazetteer.FeatureGazetteer/g;
   $s =~ s/extendedgazetteer2\.FeatureGazetteerProcessingMode/extendedgazetteer.ExtendedGazetteerProcessingMode/g;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchStartFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
+  $s =~ s{^\s*<entry>\s*\n\s*<string>matchStartFeature</string>\s*\n\s*<string></string>\s*\n\s*</entry>\n}{}mg;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchEndFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
+  $s =~ s{^\s*<entry>\s*\n\s*<string>matchEndFeature</string>\s*\n\s*<string></string>\s*\n\s*</entry>\n}{}mg;
   $s =~ s{^\s*<entry>\s*\n\s*<string>matchTypeFeature</string>\s*\n\s*<null/>\s*\n\s*</entry>\n}{}mg;
+  $s =~ s{^\s*<entry>\s*\n\s*<string>matchTypeFeature</string>\s*\n\s*<string></string>\s*\n\s*</entry>\n}{}mg;
   open(OUT,">",$f) or die "Could not open file $f for writing: $!";
   print OUT $s;
   close OUT;
