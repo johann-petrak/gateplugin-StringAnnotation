@@ -101,7 +101,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   @Optional
   public void setGazetteerFeatureSeparator(String sep) {
     gazetteerFeatureSeparator = sep;
-    if(sep == null || !sep.isEmpty()) {
+    if(sep == null || sep.isEmpty()) {
       unescapedSeparator = Strings.unescape("\\t");
     } else {
       unescapedSeparator = Strings.unescape(sep);
@@ -118,7 +118,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   protected Logger logger;
   //protected CharMapState initialState;
   protected GazStore gazStore;
-  private static final int MAX_FEATURES_PER_ENTRY = 200;
+  private static final int MAX_FEATURES_PER_ENTRY = 500;
   private static Pattern ws_pattern;
   private static final String ws_chars =
           "\\u0009" // CHARACTER TABULATION
