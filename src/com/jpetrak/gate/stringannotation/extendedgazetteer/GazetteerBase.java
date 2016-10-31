@@ -425,8 +425,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     if (languages != null) {
       listFeatures.put(LOOKUP_LANGUAGE_FEATURE_NAME, languages);
     }
-    gazStore.addListInfo(annotationType, lurl.toString(), listFeatures);
-    int infoIndex = gazStore.getListInfos().size() - 1;
+    int infoIndex = gazStore.addListInfo(annotationType, lurl.toString(), listFeatures);
     //Lookup defaultLookup = new Lookup(listFileName, majorType, minorType, 
     //        languages, annotationType);
     BufferedReader listReader = null;
