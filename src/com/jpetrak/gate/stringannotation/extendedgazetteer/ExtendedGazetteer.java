@@ -98,7 +98,7 @@ public class ExtendedGazetteer extends GazetteerBase
   @RunTime
   @Optional
   @CreoleParameter(
-    comment = "The word annotation set type",
+    comment = "The word annotation type: this is needed to find word beginnings and -ends",
   defaultValue = "Token")
   public void setWordAnnotationType(String val) {
     this.wordAnnotationType = val;
@@ -140,7 +140,7 @@ public class ExtendedGazetteer extends GazetteerBase
   @RunTime
   @Optional
   @CreoleParameter(
-    comment = "The containing annotation set type",
+    comment = "The containing annotation type: if specified only annotate within such annotations.",
   defaultValue = "")
   public void setContainingAnnotationType(String val) {
     this.containingAnnotationType = val;
@@ -153,7 +153,7 @@ public class ExtendedGazetteer extends GazetteerBase
   @RunTime
   @Optional
   @CreoleParameter(
-    comment = "The splitting annotation set type",
+    comment = "The splitting annotation type: never match across an annotation of this type",
   defaultValue = "Split")
   public void setSplitAnnotationType(String val) {
     this.splitAnnotationType = val;
