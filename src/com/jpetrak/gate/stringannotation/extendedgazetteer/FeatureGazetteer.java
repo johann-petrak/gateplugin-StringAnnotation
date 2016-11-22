@@ -272,9 +272,11 @@ public class FeatureGazetteer extends GazetteerBase
   protected void processMatch(Annotation ann, Iterator<Lookup> lookups, 
       AnnotationSet inputAS, AnnotationSet outputAS) {
     if(getProcessingMode().equals(FeatureGazetteerProcessingMode.AddFeatures)) {
-      addLookupsToAnn(ann, lookups, false);
+      addLookupsToAnn(ann, lookups, false, false);
     } else if(getProcessingMode().equals(FeatureGazetteerProcessingMode.OverwriteFeatures)) {
-      addLookupsToAnn(ann, lookups, true);
+      addLookupsToAnn(ann, lookups, true, false);
+    } else if(getProcessingMode().equals(FeatureGazetteerProcessingMode.OverwriteAndBackupFeatures)) {
+      addLookupsToAnn(ann, lookups, true, true);
     } else if(getProcessingMode().equals(FeatureGazetteerProcessingMode.RemoveAnnotation)) {
       inputAS.remove(ann);
     } else if(getProcessingMode().equals(FeatureGazetteerProcessingMode.AddNewAnnotation)) {
@@ -317,7 +319,7 @@ public class FeatureGazetteer extends GazetteerBase
     }
   }
 
-  protected void addLookupsToAnn(Annotation ann, Iterator<Lookup> lookups, boolean overwrite) {
+  protected void addLookupsToAnn(Annotation ann, Iterator<Lookup> lookups, boolean overwrite, boolean backup) {
     FeatureMap fm = ann.getFeatures();
     while(lookups.hasNext()) {
       Lookup lookup = lookups.next();
@@ -331,9 +333,21 @@ public class FeatureGazetteer extends GazetteerBase
         }
         newFm = newFm2;
       }
-      if(overwrite) {        
-        fm.putAll(newFm);
-        fm.putAll(newFm);
+      if(overwrite) {
+        if(backup) {
+          // override the features in the target feature map, but if a feature already exists,
+          // also back it up.
+          for(Object key : newFm.keySet()) {
+            // if the key is already in the target set, back up to new feature
+            // NOTE: we silently assume that key is a string or it gets converted to String!
+            if(fm.get(key) != null) {
+              fm.put((key.toString())+"Old", fm.get(key));
+            }
+            fm.put(key, newFm.get(key));
+          }
+        } else {
+          fm.putAll(newFm);
+        }
       } else {
         // now add only features not already in fm
         for(Object key : newFm.keySet()) {

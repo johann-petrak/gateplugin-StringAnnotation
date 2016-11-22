@@ -22,7 +22,8 @@ package com.jpetrak.gate.stringannotation.extendedgazetteer;
 
 public enum FeatureGazetteerProcessingMode {
     AddFeatures, 
-    OverwriteFeatures, 
+    OverwriteFeatures,
+    OverwriteAndBackupFeatures,
     RemoveAnnotation, 
     KeepAnnotation, 
     AddNewAnnotation 
