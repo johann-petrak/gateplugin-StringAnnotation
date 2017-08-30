@@ -2,8 +2,8 @@
  * Copyright (c) 2010- Austrian Research Institute for Artificial Intelligence (OFAI). 
  * Copyright (C) 2014-2016 The University of Sheffield.
  *
- * This file is part of gateplugin-ModularPipelines
- * (see https://github.com/johann-petrak/gateplugin-ModularPipelines)
+ * This file is part of gateplugin-StringAnnotation
+ * (see https://github.com/johann-petrak/gateplugin-StringAnnotation)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License

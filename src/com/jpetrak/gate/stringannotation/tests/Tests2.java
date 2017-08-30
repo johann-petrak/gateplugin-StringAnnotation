@@ -100,7 +100,7 @@ public class Tests2 {
     before = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     startTime = System.currentTimeMillis();
     GazStoreTrie3 gs = new GazStoreTrie3();
-    gs = (GazStoreTrie3)gs.load(save);
+    gs = (GazStoreTrie3)gs.load(save.toURI().toURL());
     endTime = System.currentTimeMillis();
     after = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
     System.out.println("Loading completed");

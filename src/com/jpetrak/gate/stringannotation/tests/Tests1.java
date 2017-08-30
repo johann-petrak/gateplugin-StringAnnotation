@@ -423,7 +423,7 @@ public class Tests1 {
     }
     GazStoreTrie3 gs2 = new GazStoreTrie3();
     try {
-      gs2 = (GazStoreTrie3)gs2.load(someFile);
+      gs2 = (GazStoreTrie3)gs2.load(someFile.toURI().toURL());
     } catch (FileNotFoundException e) {
       e.printStackTrace();
       assertTrue("could not load trie",false);

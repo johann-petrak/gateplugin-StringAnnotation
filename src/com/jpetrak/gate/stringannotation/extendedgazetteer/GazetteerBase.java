@@ -49,9 +49,11 @@ import java.util.regex.Pattern;
 import org.apache.log4j.Logger;
 
 import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.GazStoreTrie3;
+import com.jpetrak.gate.stringannotation.utils.UrlUtils;
 import gate.GateConstants;
 import gate.creole.metadata.Optional;
 import gate.gui.ActionsPublisher;
+import gate.util.Files;
 import java.awt.event.ActionEvent;
 import java.io.InputStreamReader;
 import java.util.zip.GZIPInputStream;
@@ -75,6 +77,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
    */
   @CreoleParameter(comment = "The URL to the gazetteer configuration file", suffixes = "def;defyaml", defaultValue = "")
   public void setConfigFileURL(java.net.URL theURL) {
+    System.err.println("DEBUG: setting config file to "+theURL);
     configFileURL = theURL;
   }
 
@@ -86,6 +89,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   @CreoleParameter(comment = "Should this gazetteer differentiate on case",
           defaultValue = "true")
   public void setCaseSensitive(Boolean yesno) {
+    System.err.println("DEBUG: setting case sensitive to "+yesno);
     caseSensitive = yesno;
   }
 
@@ -97,6 +101,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   @CreoleParameter(comment = "For case insensitive matches, the locale to use for normalizing case",
           defaultValue = "en")
   public void setCaseConversionLanguage(String val) {
+    System.err.println("DEBUG: case conversion language set to "+val);
     caseConversionLanguage = val;
     caseConversionLocale = new Locale(val);
   }
@@ -162,7 +167,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
           ;
   private static final String ws_class = "[" + ws_chars + "]";
   private static final String ws_patternstring = ws_class + "+";
-  private static final String encoding = "UTF-8";
+  private static final String UTF8 = "UTF-8";
 
   public GazetteerBase() {
     logger = Logger.getLogger(this.getClass().getName());
@@ -173,12 +178,14 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     // precompile the pattern used to replace all unicode whitespace in gazetteer
     // entries with a single space.
     ws_pattern = Pattern.compile(ws_patternstring);
+    System.err.println("DEBUG: running init(), caseConversionLanguage is "+caseConversionLanguage);
     incrementGazStore();
     return this;
   }
   protected static Map<String, GazStore> loadedGazStores = new HashMap<String, GazStore>();
 
   private synchronized void incrementGazStore() throws ResourceInstantiationException {
+    System.err.println("DEBUG running incrementGazStore");
     String uniqueGazStoreKey = genUniqueGazStoreKey();
     logger.info("Creating gazetteer for " + getConfigFileURL());
     System.gc();
@@ -191,6 +198,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       gazStore = gs;
       gazStore.refcount++;
       logger.info("Reusing already generated GazStore for " + uniqueGazStoreKey);
+      System.err.println("Reusing already generated gaz store for "+uniqueGazStoreKey);
     } else {
       try {
         loadData();
@@ -198,8 +206,10 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       } catch (Exception ex) {
         throw new ResourceInstantiationException("Could not load gazetteer", ex);
       }
+      
       gazStore.refcount++;
       loadedGazStores.put(uniqueGazStoreKey, gazStore);
+      System.err.println("DEBUG addeed new gaz store with key "+uniqueGazStoreKey);
       logger.info("New GazStore loaded for " + uniqueGazStoreKey);
     }
     long endTime = System.currentTimeMillis();
@@ -238,27 +248,36 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   
   
   private synchronized void decrementGazStore() {
+    System.err.println("DEBUG:  running decrementGazStore, map contains: "+loadedGazStores.keySet());
     String key = genUniqueGazStoreKey();
+    System.err.println("DEBUG: key for finding the gaz store: "+key);
     GazStore gs = loadedGazStores.get(key);
+    System.err.println("DEBUG got a gaz store: "+gs);
     gs.refcount--;
     if (gs.refcount == 0) {
+      System.err.println("DEBUG: removing gaz store key");
       loadedGazStores.remove(key);
       logger.info("Removing GazStore for " + key);
     }
   }
 
   private synchronized void removeGazStore() {
+    System.err.println("DEBUG: running removeGazStore()");
     String key = genUniqueGazStoreKey();
+    System.err.println("DEBUG: removing gazstore key: "+key);
     loadedGazStores.remove(key);
     logger.info("reInit(): force-removing GazStore for " + key);
   }
 
   protected String genUniqueGazStoreKey() {
-    return " cs=" + caseSensitive + " url=" + configFileURL + " lang=" + caseConversionLanguage;
+    String key = " cs=" + caseSensitive + " url=" + configFileURL + " lang=" + caseConversionLanguage;
+    System.err.println("DEBUG: generating the gaz store key: "+key);    
+    return key;
   }
 
   @Override
   public void cleanup() {
+    System.err.println("DEBUG: running cleanup()");
     decrementGazStore();
   }
 
@@ -272,17 +291,18 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   public void reInit() throws ResourceInstantiationException {
     //removeGazStore();
     //init();
+    System.err.println("DEBUG: running reInit()");
     replaceGazStore();
   }
 
   protected void loadData() throws UnsupportedEncodingException, IOException, ResourceInstantiationException {
     // if we find the cache file, load it, else load the original files and create the cache file
 
-    File configFile = gate.util.Files.fileFromURL(configFileURL);
+    //!File configFile = gate.util.Files.fileFromURL(configFileURL);
 
     // check the extension and determine if we have an old format .def file or 
     // a new format .defyaml file
-    String name = configFile.getName();
+    String name = UrlUtils.getName(configFileURL);
     int i = name.lastIndexOf('.') + 1;
     if (i < 0) {
       throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
@@ -292,86 +312,90 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
     }
     if (ext.equals("def")) {
-      loadDataFromDef(configFile);
+      loadDataFromDef(configFileURL);
     } else {
-      loadDataFromYaml(configFile);
+      loadDataFromYaml(configFileURL);
     }
   }
 
-  protected void loadDataFromDef(File configFile) throws IOException {
-    String configFileName = configFile.getAbsolutePath();
+  protected void loadDataFromDef(URL configFileURL) throws IOException {
+    String configFileName = configFileURL.toExternalForm();
     String gazbinFileName = configFileName.replaceAll("\\.def$", ".gazbin");
     if (configFileName.equals(gazbinFileName)) {
-      throw new GateRuntimeException("Config file must have def or defyaml extension");
+      throw new GateRuntimeException("Config file must have def or defyaml extension, not "+configFileURL);
     }
-    File gazbinFile = new File(gazbinFileName);
+    URL gazbinURL = new URL(gazbinFileName);
 
-    if (gazbinFile.exists()) {
+    if (UrlUtils.exists(gazbinURL)) {
       gazStore = new GazStoreTrie3();
-      gazStore = gazStore.load(gazbinFile);
+      gazStore = gazStore.load(gazbinURL);
 
     } else {
       gazStore = new GazStoreTrie3();
-      BufferedReader defReader =
-              new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
-      String line;
-      //logger.info("Loading data");
-      while (null != (line = defReader.readLine())) {
-        String[] fields = line.split(":");
-        if (fields.length == 0) {
-          System.err.println("Empty line in file " + configFileURL);
-        } else {
-          String listFileName = "";
-          String majorType = "";
-          String minorType = "";
-          String languages = "";
-          String annotationType = ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
-          listFileName = fields[0];
-          if (fields.length > 1) {
-            majorType = fields[1];
+      try (BufferedReader defReader = new BomStrippingInputStreamReader((configFileURL).openStream(), UTF8)) {
+        String line;
+        //logger.info("Loading data");
+        while (null != (line = defReader.readLine())) {
+          String[] fields = line.split(":");
+          if (fields.length == 0) {
+            System.err.println("Empty line in file " + configFileURL);
+          } else {
+            String listFileName = "";
+            String majorType = "";
+            String minorType = "";
+            String languages = "";
+            String annotationType = ANNIEConstants.LOOKUP_ANNOTATION_TYPE;
+            listFileName = fields[0];
+            if (fields.length > 1) {
+              majorType = fields[1];
+            }
+            if (fields.length > 2) {
+              minorType = fields[2];
+            }
+            if (fields.length > 3) {
+              languages = fields[3];
+            }
+            if (fields.length > 4) {
+              annotationType = fields[4];
+            }
+            if (fields.length > 5) {
+              defReader.close();
+              throw new GateRuntimeException("Line has more that 5 fields in def file " + configFileURL);
+            }
+            logger.debug("Reading from " + listFileName + ", " + majorType + "/" + minorType + "/" + languages + "/" + annotationType);
+            //logger.info("DEBUG: loading data from "+listFileName);
+            loadListFile(listFileName, majorType, minorType, languages, annotationType);
           }
-          if (fields.length > 2) {
-            minorType = fields[2];
-          }
-          if (fields.length > 3) {
-            languages = fields[3];
-          }
-          if (fields.length > 4) {
-            annotationType = fields[4];
-          }
-          if (fields.length > 5) {
-            defReader.close();
-            throw new GateRuntimeException("Line has more that 5 fields in def file " + configFileURL);
-          }
-          logger.debug("Reading from " + listFileName + ", " + majorType + "/" + minorType + "/" + languages + "/" + annotationType);
-          //logger.info("DEBUG: loading data from "+listFileName);
-          loadListFile(listFileName, majorType, minorType, languages, annotationType);
-        }
-      } //while
-      defReader.close();
+        } //while
+      } // try
       gazStore.compact();
       logger.info("Gazetteer loaded from list files");
 
-      gazStore.save(gazbinFile);
+      // only write the cache if we loaded the def file from an actual file, not
+      // some other URL
+      if(UrlUtils.isFile(gazbinURL)) {
+        File gazbinFile = Files.fileFromURL(gazbinURL);
+        gazStore.save(gazbinFile);
+      }
     } // gazbinFile exists ... else
   }
 
-  protected void loadDataFromYaml(File configFile) throws IOException {
-    String configFileName = configFile.getAbsolutePath();
+  protected void loadDataFromYaml(URL configFileURL) throws IOException {
+    String configFileName = configFileURL.toExternalForm();
     String gazbinFileName = configFileName.replaceAll("\\.defyaml$", ".gazbin");
     if (configFileName.equals(gazbinFileName)) {
       throw new GateRuntimeException("Config file must have def or defyaml extension");
     }
-    File gazbinFile = new File(gazbinFileName);
+    URL gazbinURL = new URL(gazbinFileName);
 
-    String gazbinDir = gazbinFile.getParent();
-    String gazbinName = gazbinFile.getName();
+    String gazbinDir = UrlUtils.getParent(gazbinURL);
+    String gazbinName = UrlUtils.getName(gazbinURL);
 
     // Always read the yaml file so we can get any special location of the cache
     // file or figure out that we should not try to load the cache file
     Yaml yaml = new Yaml();
     BufferedReader yamlReader =
-            new BomStrippingInputStreamReader((configFileURL).openStream(), encoding);
+            new BomStrippingInputStreamReader((configFileURL).openStream(), UTF8);
     Object configObject = yaml.load(yamlReader);
 
     List<Map> configListFiles = null;
@@ -385,7 +409,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       if (configCacheFileName != null) {
         gazbinName = configCacheFileName;
       }
-      gazbinFile = new File(new File(gazbinDir), gazbinName);
+      gazbinURL = UrlUtils.newURL(new URL(gazbinDir), gazbinName);
       configListFiles = (List<Map>) configMap.get("listFiles");
     } else if (configObject instanceof List) {
       configListFiles = (List<Map>) configObject;
@@ -394,9 +418,9 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     }
 
     // if we want to load the cache and it exists, load it
-    if (gazbinFile.exists()) {
+    if (UrlUtils.exists(gazbinURL)) {
       gazStore = new GazStoreTrie3();
-      gazStore = gazStore.load(gazbinFile);
+      gazStore = gazStore.load(gazbinURL);
     } else {
       gazStore = new GazStoreTrie3();
       // go through all the list and tsv files to load and load them
@@ -409,8 +433,11 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       gazStore.compact();
       logger.info("Gazetteer loaded from list files");
 
-      gazStore.save(gazbinFile);
-    } // gazbinFile exists ... else
+      if(UrlUtils.isFile(gazbinURL)) {
+       File gazbinFile = Files.fileFromURL(gazbinURL);
+       gazStore.save(gazbinFile);
+      }
+    }
   }
 
   void loadListFile(String listFileName, String majorType, String minorType,
@@ -430,9 +457,9 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     //        languages, annotationType);
     BufferedReader listReader = null;
     if (listFileName.endsWith(".gz")) {
-      listReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(lurl.openStream()), encoding));
+      listReader = new BufferedReader(new InputStreamReader(new GZIPInputStream(lurl.openStream()), UTF8));
     } else {
-      listReader = new BomStrippingInputStreamReader(lurl.openStream(), encoding);
+      listReader = new BomStrippingInputStreamReader(lurl.openStream(), UTF8);
     }
     String line;
     int lines = 0;

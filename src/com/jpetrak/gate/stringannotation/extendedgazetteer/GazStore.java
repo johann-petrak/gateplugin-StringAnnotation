@@ -28,10 +28,8 @@ import java.util.Iterator;
 import java.io.Serializable;
 
 
-import com.jpetrak.gate.stringannotation.extendedgazetteer.State;
-
-
 import gate.FeatureMap;
+import java.net.URL;
 
 /**
  * A GazStore represents a loaded gazetteer plus all the methods for loading, caching,
@@ -101,7 +99,7 @@ public abstract class GazStore implements Serializable {
   
   public abstract void save(File whereTo) throws FileNotFoundException, IOException;
 
-  public abstract GazStore load(File whereFrom) throws IOException;
+  public abstract GazStore load(URL whereFrom) throws IOException;
   
   public int refcount = 0;
   

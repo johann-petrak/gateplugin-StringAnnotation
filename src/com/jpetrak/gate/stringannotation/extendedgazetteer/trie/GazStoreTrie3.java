@@ -47,6 +47,7 @@ import com.jpetrak.gate.stringannotation.extendedgazetteer.GazStore;
 import com.jpetrak.gate.stringannotation.extendedgazetteer.ListInfo;
 import com.jpetrak.gate.stringannotation.extendedgazetteer.Lookup;
 import com.jpetrak.gate.stringannotation.extendedgazetteer.Visitor;
+import java.net.URL;
 
 
 public class GazStoreTrie3 extends GazStore {
@@ -518,19 +519,18 @@ public class GazStoreTrie3 extends GazStore {
   }
   
   @Override
-  public GazStore load(File whereFrom) throws IOException {
+  public GazStore load(URL whereFrom) throws IOException {
     System.out.println("Loading cache file from "+whereFrom);
     long start = System.currentTimeMillis();
-    InputStream input = new FileInputStream(whereFrom);
-    input = new GZIPInputStream(input);
-    ObjectInputStream inputobject = new ObjectInputStream(input);
     Object object = null;
-    try {
-      object = inputobject.readObject();
-      inputobject.close();
-    } catch (ClassNotFoundException e) {
-      throw new GateRuntimeException("Could not re-load gazstore object: class error"+e);
+    try (InputStream ins = whereFrom.openStream();
+         GZIPInputStream ing = new GZIPInputStream(ins);
+         ObjectInputStream ino = new ObjectInputStream(ing)) {
+      object = ino.readObject();
+    } catch (Exception ex) {
+      throw new GateRuntimeException("Could not re-load gazstore object from"+whereFrom,ex);
     }
+    if(object == null) throw new GateRuntimeException("Still null: Could not re-load gazstore object from "+whereFrom);
     GazStoreTrie3 gs = null;
     if(object instanceof GazStoreTrie3) {
       gs = (GazStoreTrie3)object;
