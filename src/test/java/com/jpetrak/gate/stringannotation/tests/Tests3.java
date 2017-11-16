@@ -28,6 +28,7 @@ import gate.Gate;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
+import gate.test.GATEPluginTests;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,31 +52,18 @@ import com.jpetrak.gate.stringannotation.extendedgazetteer.ExtendedGazetteer;
 import com.jpetrak.gate.stringannotation.extendedgazetteer.trie.GazStoreTrie3;
 import com.jpetrak.gate.stringannotation.utils.StoreArrayOfCharArrays;
 
-public class Tests3 {
+public class Tests3 extends GATEPluginTests {
 
-  private static boolean isInitialized = false; 
   private static File testingDir;
   @BeforeClass
   public static void init() throws GateException, MalformedURLException {
-    if(!isInitialized) {
-      System.out.println("Tests3: Inititalizing ...");
-      isInitialized = true;
-      Gate.runInSandbox(true);
-      Gate.init();
       File pluginHome = new File(".");
-      System.out.println("Plugin home directory is "+pluginHome.getAbsolutePath());
-      Gate.getCreoleRegister().registerDirectories(
-              pluginHome.toURI().toURL());
       testingDir = new File(pluginHome,"tests");
-      assertTrue("Directory 'tests' does not exist",testingDir.exists());
-    } else {
-      System.out.println("Already initialized ...");
-    }
   }
   
   @AfterClass
   public static void cleanup() throws Exception {
-    System.out.println("Tests3: Cleaning up ...");
+    //System.out.println("Tests3: Cleaning up ...");
   }
   
   public OutputStream openOutputStream(String filename, boolean compressed) 

@@ -25,10 +25,10 @@ import gate.AnnotationSet;
 import gate.Document;
 import gate.Factory;
 import gate.FeatureMap;
-import gate.Gate;
 import gate.creole.ExecutionException;
 import gate.creole.ResourceInstantiationException;
 import gate.util.GateException;
+import gate.test.GATEPluginTests;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -40,31 +40,19 @@ import org.junit.Test;
 import com.jpetrak.gate.stringannotation.regexp.JavaRegexpAnnotator;
 import com.jpetrak.gate.stringannotation.regexp.MatchPreference;
 
-public class TestJavaRegexpAnnotator1 {
+public class TestJavaRegexpAnnotator1 extends GATEPluginTests {
 
-  private static boolean isInitialized = false; 
   private static File testingDir;
   @BeforeClass
   public static void init() throws GateException, MalformedURLException {
-    if(!isInitialized) {
-      System.out.println("Tests1: Inititalizing ...");
-      isInitialized = true;
-      Gate.runInSandbox(true);
-      Gate.init();
-      File pluginHome = new File(".");
-      System.out.println("Plugin home directory is "+pluginHome.getAbsolutePath());
-      Gate.getCreoleRegister().registerDirectories(
-              pluginHome.toURI().toURL());
-      testingDir = new File(pluginHome,"tests");
-      assertTrue("Directory 'tests' does not exist",testingDir.exists());
-    } else {
-      System.out.println("Already initialized ...");
-    }
+    File pluginHome = new File(".");
+    testingDir = new File(pluginHome,"tests");
+    assertTrue("Directory 'tests' does not exist",testingDir.exists());
   }
   
   @AfterClass
   public static void cleanup() throws Exception {
-    System.out.println("Tests1: Cleaning up ...");
+    // 
   }
   
   @Test
