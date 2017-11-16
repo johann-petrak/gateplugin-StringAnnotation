@@ -54,8 +54,10 @@ import gate.GateConstants;
 import gate.creole.metadata.Optional;
 import gate.gui.ActionsPublisher;
 import gate.util.Files;
+import gate.creole.ResourceReference;
 import java.awt.event.ActionEvent;
 import java.io.InputStreamReader;
+import java.util.logging.Level;
 import java.util.zip.GZIPInputStream;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -76,15 +78,14 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
    *
    */
   @CreoleParameter(comment = "The URL to the gazetteer configuration file", suffixes = "def;defyaml", defaultValue = "")
-  public void setConfigFileURL(java.net.URL theURL) {
-    System.err.println("DEBUG: setting config file to "+theURL);
+  public void setConfigFileURL(ResourceReference theURL) {
     configFileURL = theURL;
   }
 
-  public java.net.URL getConfigFileURL() {
+  public ResourceReference getConfigFileURL() {
     return configFileURL;
   }
-  private java.net.URL configFileURL;
+  private ResourceReference configFileURL;
 
   @CreoleParameter(comment = "Should this gazetteer differentiate on case",
           defaultValue = "true")
@@ -302,7 +303,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
 
     // check the extension and determine if we have an old format .def file or 
     // a new format .defyaml file
-    String name = UrlUtils.getName(configFileURL);
+    String name = UrlUtils.getName(configFileURL.toURL());
     int i = name.lastIndexOf('.') + 1;
     if (i < 0) {
       throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
@@ -312,9 +313,9 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
       throw new GateRuntimeException("Config file must have a .def or .defyaml extension");
     }
     if (ext.equals("def")) {
-      loadDataFromDef(configFileURL);
+      loadDataFromDef(configFileURL.toURL());
     } else {
-      loadDataFromYaml(configFileURL);
+      loadDataFromYaml(configFileURL.toURL());
     }
   }
 
@@ -445,7 +446,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
           throws MalformedURLException, IOException {
 
     //logger.info("Loading list file "+listFileName);
-    URL lurl = new URL(configFileURL, listFileName);
+    URL lurl = new URL(configFileURL.toURL(), listFileName);
     FeatureMap listFeatures = Factory.newFeatureMap();
     listFeatures.put(LOOKUP_MAJOR_TYPE_FEATURE_NAME, majorType);
     listFeatures.put(LOOKUP_MINOR_TYPE_FEATURE_NAME, minorType);
@@ -627,7 +628,17 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
 
         @Override
         public void actionPerformed(ActionEvent evt) {
-          File configFile = gate.util.Files.fileFromURL(getConfigFileURL());
+          URL cfgURL = null;
+          try {
+            cfgURL = configFileURL.toURL();
+          } catch (IOException ex) {
+            ex.printStackTrace(System.err);
+            System.err.println("Could not re-initialize, problem getting URL for "+configFileURL);
+          }
+          if(!UrlUtils.isFile(cfgURL)) {
+            System.err.println("Could not re-initialize, not a file URL");
+          }
+          File configFile = gate.util.Files.fileFromURL(cfgURL);
           String configFileName = configFile.getAbsolutePath();
           String gazbinFileName = configFileName.replaceAll("(?:\\.def$|\\.defyaml)", ".gazbin");
           if (configFileName.equals(gazbinFileName)) {
