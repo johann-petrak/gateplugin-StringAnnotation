@@ -2,6 +2,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
+        
+	<name>StringAnnotation Plugin</name>
+        <description>TODO: description of what the plugin does, plus maybe a list of tags here??</description>
+	<url>https://github.com/johann-petrak/gateplugin-StringAnnotation</url>
 
 	<parent>
 		<groupId>uk.ac.gate</groupId>
@@ -20,8 +24,6 @@
 
 	<licenses>
 		<license>
-			<!-- this is the license we usually use for plugins but feel free to change 
-				this if you feel a different license would be more suitable for your plugin -->
 			<name>GNU Lesser General Public License (LGPL), Version 3</name>
 			<url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
 			<distribution>repo</distribution>
