@@ -85,7 +85,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   public ResourceReference getConfigFileURL() {
     return configFileURL;
   }
-  private ResourceReference configFileURL;
+  protected ResourceReference configFileURL;
 
   @CreoleParameter(comment = "Should this gazetteer differentiate on case",
           defaultValue = "true")
@@ -110,7 +110,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   public String getCaseConversionLanguage() {
     return caseConversionLanguage;
   }
-  private String caseConversionLanguage;
+  protected String caseConversionLanguage;
 
   @CreoleParameter(
       comment = "The character used to separate features for entries in gazetteer lists. Accepts strings like &quot;\t&quot; and will unescape it to the relevant character. If not specified, a tab character will be used",
@@ -137,8 +137,8 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   //protected CharMapState initialState;
   protected GazStore gazStore;
   private static final int MAX_FEATURES_PER_ENTRY = 500;
-  private static Pattern ws_pattern;
-  private static final String ws_chars =
+  protected static Pattern ws_pattern;
+  protected static final String ws_chars =
           "\\u0009" // CHARACTER TABULATION
           + "\\u000A" // LINE FEED (LF)
           + "\\u000B" // LINE TABULATION
@@ -166,9 +166,9 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
           + "\\u205F" // MEDIUM MATHEMATICAL SPACE
           + "\\u3000" // IDEOGRAPHIC SPACE
           ;
-  private static final String ws_class = "[" + ws_chars + "]";
-  private static final String ws_patternstring = ws_class + "+";
-  private static final String UTF8 = "UTF-8";
+  protected static final String ws_class = "[" + ws_chars + "]";
+  protected static final String ws_patternstring = ws_class + "+";
+  protected static final String UTF8 = "UTF-8";
 
   public GazetteerBase() {
     logger = Logger.getLogger(this.getClass().getName());
@@ -185,7 +185,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   }
   protected static Map<String, GazStore> loadedGazStores = new HashMap<String, GazStore>();
 
-  private synchronized void incrementGazStore() throws ResourceInstantiationException {
+  public synchronized void incrementGazStore() throws ResourceInstantiationException {
     System.err.println("DEBUG running incrementGazStore");
     String uniqueGazStoreKey = genUniqueGazStoreKey();
     logger.info("Creating gazetteer for " + getConfigFileURL());
@@ -222,7 +222,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     logger.info(gazStore.statsString());
   }
 
-  private synchronized void replaceGazStore() throws ResourceInstantiationException {
+  public synchronized void replaceGazStore() throws ResourceInstantiationException {
     String uniqueGazStoreKey = genUniqueGazStoreKey();
     logger.info("Replacing gazetteer for " + getConfigFileURL());
     System.gc();
@@ -248,7 +248,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
   }
   
   
-  private synchronized void decrementGazStore() {
+  public synchronized void decrementGazStore() {
     System.err.println("DEBUG:  running decrementGazStore, map contains: "+loadedGazStores.keySet());
     String key = genUniqueGazStoreKey();
     System.err.println("DEBUG: key for finding the gaz store: "+key);
@@ -262,7 +262,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     }
   }
 
-  private synchronized void removeGazStore() {
+  public synchronized void removeGazStore() {
     System.err.println("DEBUG: running removeGazStore()");
     String key = genUniqueGazStoreKey();
     System.err.println("DEBUG: removing gazstore key: "+key);
@@ -608,7 +608,7 @@ public abstract class GazetteerBase extends AbstractLanguageAnalyser implements 
     return fms;
   }
 
-  private List<Action> actions;
+  protected List<Action> actions;
   
   @Override
   public List<Action> getActions() {
