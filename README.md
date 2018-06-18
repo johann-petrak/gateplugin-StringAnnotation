@@ -1,5 +1,5 @@
-OLD gateplugin-StringAnnotation OLD
-===================================
+!!!!!!!OLD gateplugin-StringAnnotation OLD!!!!!!!
+=================================================
 
 IMPORTANT: this version of the plugin will not be actively maintained any more. The new, mavenized version of the plugin
 for GATE version 8.5 and later can be found here: https://github.com/GateNLP/gateplugin-StringAnnotation
