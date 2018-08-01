@@ -301,7 +301,7 @@ public class TextChunk {
           if(caseNormalize) {
             c = Character.toUpperCase(c);
           }
-          chunk.putTextChar(i, wordTextChars[j]);
+          chunk.putTextChar(i, c);
           // was: chunk.text[i] = wordTextChars[j];
           if(haveFeature) {
             chunk.putStartOffset(i, curStart);
